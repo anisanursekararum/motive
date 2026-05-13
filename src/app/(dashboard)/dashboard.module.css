@@ -1,0 +1,124 @@
+.layoutContainer {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--color-light-gray);
+}
+
+.topNav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 48px;
+  background-color: var(--color-light-gray); /* Match background */
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05); /* very subtle */
+}
+
+.navLeft {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.logo {
+  color: var(--color-motive-dark-blue);
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.welcomeText {
+  color: var(--color-dark-gray);
+  font-size: 14px;
+}
+
+.searchContainer {
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: 320px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  color: var(--color-dark-gray);
+}
+
+.searchInput {
+  width: 100%;
+  padding: 8px 12px 8px 36px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background-color: var(--color-white);
+  font-size: 14px;
+  color: var(--color-black);
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.searchInput:focus {
+  border-color: var(--color-motive-light-blue);
+  box-shadow: 0 0 0 2px rgba(74, 95, 217, 0.2);
+}
+
+.navLinks {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-dark-gray);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  padding-bottom: 4px;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.navItem:hover {
+  color: var(--color-motive-dark-blue);
+}
+
+.navItem.active {
+  color: var(--color-motive-dark-blue);
+  border-bottom-color: var(--color-motive-dark-blue);
+}
+
+.mainContent {
+  flex: 1;
+  padding: 24px 48px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+@media (max-width: 1024px) {
+  .topNav, .mainContent {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .topNav {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  
+  .searchContainer {
+    width: 100%;
+  }
+  
+  .navLinks {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+}

@@ -1,0 +1,79 @@
+.btn {
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.btnPrimary {
+  background-color: var(--color-motive-dark-blue);
+  color: var(--color-white);
+}
+
+.btnPrimary:hover {
+  background-color: var(--color-motive-light-blue);
+}
+
+.btnSecondary {
+  background-color: transparent;
+  color: var(--color-motive-dark-blue);
+  border: 1px solid var(--color-motive-dark-blue);
+}
+
+.btnSecondary:hover {
+  border-color: var(--color-motive-light-blue);
+  color: var(--color-motive-light-blue);
+  background-color: rgba(74, 95, 217, 0.05);
+}
+
+.card {
+  background-color: var(--color-white);
+  border-radius: 12px;
+  box-shadow: var(--shadow-level-1);
+  padding: 24px;
+}
+
+.input, .textarea {
+  border-radius: 8px;
+  border: 1px solid #d1d5db; /* Light gray border */
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 14px;
+  width: 100%;
+  transition: all 0.2s ease;
+  outline: none;
+  background-color: var(--color-white);
+  color: var(--text-color);
+}
+
+.input:focus, .textarea:focus {
+  border-color: var(--color-motive-light-blue);
+  box-shadow: 0 0 0 2px rgba(74, 95, 217, 0.2);
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  border-radius: 4px;
+  background-color: rgba(46, 58, 140, 0.1);
+  color: var(--color-motive-dark-blue);
+  font-weight: 600;
+  font-size: 11px;
+  padding: 0 8px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}

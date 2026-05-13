@@ -1,0 +1,25 @@
+{
+  "tasks": [
+    {
+      "id": "uuid-123",
+      "title": "Investigate Bug",
+      "status": "completed",
+      "deadline": "2026-05-06T18:00:00Z",
+      "completedAt": "2026-05-06T17:45:00Z"
+    }
+  ],
+  "daily_notes": [
+    {
+      "id": "note-001",
+      "content": "Pagi ini merasa sangat fokus...", 
+      "charCount": 250,
+      "timestamp": "2026-05-06T08:00:00Z"
+    },
+    {
+      "id": "note-002",
+      "content": "Materi JuaraVibeCoding ternyata sulit di bagian Cloud Functions...",
+      "charCount": 1200,
+      "timestamp": "2026-05-06T21:00:00Z"
+    }
+  ]
+}
