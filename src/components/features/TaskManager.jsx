@@ -180,7 +180,50 @@ export function TaskManager() {
 
       {/* Right Column: Daily Horizon */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '24px' }}>
-        
+                {/* Bottom Cards */}
+        <div style={{ display: 'flex', gap: '24px', marginTop: '8px' }}>
+          
+          {/* Daily Velocity */}
+          <div style={{ 
+            flex: 1,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.08)', 
+            borderTop: '4px solid var(--color-motive-dark-blue)',
+            backgroundColor: 'white',
+            borderRadius: '12px', 
+            padding: '24px' 
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <h3 style={{ margin: 0, color: 'var(--color-motive-dark-blue)', fontSize: '16px', fontWeight: 600 }}>Daily Velocity</h3>
+              <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-dark-gray)' }}>{percentCompleted}% Completed</span>
+            </div>
+            
+            {/* Progress Bar */}
+            <div style={{ width: '100%', height: '4px', backgroundColor: '#d1d5db', borderRadius: '2px', marginBottom: '24px', overflow: 'hidden' }}>
+              <div style={{ width: `${percentCompleted}%`, height: '100%', backgroundColor: 'var(--color-motive-dark-blue)', transition: 'width 0.3s ease' }}></div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--color-dark-gray)', fontWeight: 500 }}>
+              <span>{pendingTasks.length} Tasks Remaining</span>
+            </div>
+          </div>
+
+          {/* ERA Cycle Ready */}
+          <div style={{ 
+            flex: 1, 
+            backgroundColor: 'var(--color-motive-dark-blue)', 
+            borderRadius: '12px', 
+            padding: '24px',
+            color: 'white'
+          }}>
+            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+              <span style={{ fontSize: '20px' }}>✨</span> ERA Cycle Ready
+            </h3>
+            <Button style={{ backgroundColor: 'var(--color-motive-light-blue)', color: 'white', padding: '8px 24px', fontSize: '14px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}>
+             ⚡Process with AI
+            </Button>
+          </div>
+
+        </div>
         {/* Header */}
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -290,52 +333,6 @@ export function TaskManager() {
               );
             })
           )}
-        </div>
-
-        {/* Bottom Cards */}
-        <div style={{ display: 'flex', gap: '24px', marginTop: '8px' }}>
-          
-          {/* Daily Velocity */}
-          <div style={{ 
-            flex: 1, 
-            backgroundColor: '#e5e7eb',
-            borderRadius: '12px', 
-            padding: '24px' 
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
-              <h3 style={{ margin: 0, color: 'var(--color-motive-dark-blue)', fontSize: '16px', fontWeight: 600 }}>Daily Velocity</h3>
-              <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-dark-gray)' }}>{percentCompleted}% Completed</span>
-            </div>
-            
-            {/* Progress Bar */}
-            <div style={{ width: '100%', height: '4px', backgroundColor: '#d1d5db', borderRadius: '2px', marginBottom: '24px', overflow: 'hidden' }}>
-              <div style={{ width: `${percentCompleted}%`, height: '100%', backgroundColor: 'var(--color-motive-dark-blue)', transition: 'width 0.3s ease' }}></div>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--color-dark-gray)', fontWeight: 500 }}>
-              <span>{pendingTasks.length} Tasks Remaining</span>
-            </div>
-          </div>
-
-          {/* ERA Cycle Ready */}
-          <div style={{ 
-            flex: 1, 
-            backgroundColor: 'var(--color-motive-dark-blue)', 
-            borderRadius: '12px', 
-            padding: '24px',
-            color: 'white'
-          }}>
-            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-              <span style={{ fontSize: '20px' }}>✨</span> ERA Cycle Ready
-            </h3>
-            <p style={{ fontSize: '14px', opacity: 0.9, marginBottom: '24px', lineHeight: 1.5 }}>
-              You have {pendingTasks.length} tasks pending. Process them with our proprietary AI to optimize your focus flow.
-            </p>
-            <Button style={{ backgroundColor: 'var(--color-motive-light-blue)', color: 'white', padding: '8px 24px', fontSize: '14px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}>
-             ⚡Process with AI
-            </Button>
-          </div>
-
         </div>
 
       </div>

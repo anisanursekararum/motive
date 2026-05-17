@@ -43,7 +43,7 @@ export default function SettingsPage() {
         {/* Left Column */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           
-          <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+          <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderTop: '4px solid var(--color-motive-dark-blue)' }}>
             <h3 style={{ fontSize: '18px', color: 'var(--color-black)', marginBottom: '16px' }}>Profile Identity</h3>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
               <div>
@@ -64,7 +64,7 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+          <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderTop: '4px solid var(--color-motive-dark-blue)' }}>
             <h3 style={{ fontSize: '18px', color: 'var(--color-black)', marginBottom: '16px' }}>Security & Privacy</h3>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
@@ -80,7 +80,7 @@ export default function SettingsPage() {
         {/* Right Column */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
-          <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderLeft: '4px solid var(--color-motive-dark-blue)' }}>
+          <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderTop: '4px solid var(--color-motive-dark-blue)' }}>
             <h3 style={{ fontSize: '18px', color: 'var(--color-black)', marginBottom: '8px' }}>AI Reflection Service</h3>
             <p style={{ fontSize: '14px', color: 'var(--color-dark-gray)', marginBottom: '16px' }}>Configure where your daily and weekly productivity summaries are sent for reflection.</p>
             
@@ -91,10 +91,7 @@ export default function SettingsPage() {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
-                <input type="checkbox" defaultChecked /> Send daily wrap-up at 6:00 PM
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
-                <input type="checkbox" defaultChecked /> Send weekly deep-dive on Sundays
+                <input type="checkbox" defaultChecked /> Send weekly deep-dive on Sundays 6 AM
               </label>
             </div>
 
@@ -103,7 +100,7 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+          <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderTop: '4px solid var(--color-motive-dark-blue)' }}>
             <h3 style={{ fontSize: '18px', color: 'var(--color-black)', marginBottom: '16px' }}>Data Management</h3>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>

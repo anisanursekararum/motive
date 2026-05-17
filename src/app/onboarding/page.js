@@ -69,7 +69,7 @@ export default function OnboardingPage() {
           
           <h2 style={{ fontSize: '32px', color: 'var(--color-motive-dark-blue)', marginBottom: '16px' }}>Login Successful</h2>
           <p style={{ color: 'var(--color-dark-gray)', lineHeight: 1.5 }}>
-            Welcome back to your focus center.<br/>
+            Welcome to your focus center.<br/>
             Would you like to bring your previous data with you?
           </p>
         </div>

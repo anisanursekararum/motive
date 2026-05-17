@@ -165,7 +165,52 @@ export function Journaling() {
 
       {/* Right Column: Editor & Cards */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '24px' }}>
-        
+        {/* Top Cards */}
+        <div style={{ display: 'flex', gap: '24px' }}>  
+          {/* Word Count */}
+          <div style={{ 
+            flex: 1, 
+            backgroundColor: 'white', 
+            borderRadius: '12px', 
+            padding: '24px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            borderTop: '4px solid var(--color-motive-dark-blue)',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+          }}>
+            <h4 style={{ fontSize: '10px', color: 'var(--color-dark-gray)', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '8px' }}>Word & Character Count</h4>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+              <span style={{ fontSize: '24px', fontWeight: 700, color: 'var(--color-motive-dark-blue)' }}>{wordCount}</span>
+              <span style={{ fontSize: '12px', color: 'var(--color-dark-gray)' }}>words /</span>
+              <span style={{ fontSize: '24px', fontWeight: 700, color: 'var(--color-motive-dark-blue)' }}>{charCount}</span>
+              <span style={{ fontSize: '12px', color: 'var(--color-dark-gray)' }}>characters</span>
+            </div>
+            <span style={{ fontSize: '10px', color: 'var(--color-dark-gray)', marginTop: '8px', textTransform: 'uppercase' }}>Maximum 5000 Characters</span>
+          </div>
+
+          {/* ERA Cycle AI */}
+          <div style={{ 
+            flex: 1, 
+            backgroundColor: 'var(--color-motive-dark-blue)', 
+            borderRadius: '12px', 
+            padding: '24px',
+            color: 'white',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center'
+          }}>
+            <h4 style={{ fontSize: '10px', color: 'rgba(255,255,255,0.7)', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '8px' }}>ERA Cycle AI</h4>
+            <div style={{ fontSize: '16px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span>Insights Ready</span>
+              <span>✨</span>
+            </div>
+            <Button style={{ backgroundColor: 'var(--color-motive-light-blue)', color: 'white', width: '100%', padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer' }}>
+              ⚡ Extract AI Insights
+            </Button>
+          </div>
+
+        </div>
         {/* Editor Card */}
         <div style={{ 
           flex: 1,
@@ -211,60 +256,13 @@ export function Journaling() {
               lineHeight: 1.6,
               color: 'var(--color-dark-gray)',
               fontFamily: 'inherit',
-              minHeight: '200px'
+              minHeight: '375px'
             }}
           />
           
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '24px' }}>
             <Button onClick={saveNote}>Save Notes</Button>
           </div>
-        </div>
-
-        {/* Bottom Cards */}
-        <div style={{ display: 'flex', gap: '24px' }}>
-          
-          {/* Word Count */}
-          <div style={{ 
-            flex: 1, 
-            backgroundColor: '#f8fafc', 
-            borderRadius: '12px', 
-            padding: '24px',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            border: '1px solid #e5e7eb'
-          }}>
-            <h4 style={{ fontSize: '10px', color: 'var(--color-dark-gray)', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '8px' }}>Word & Character Count</h4>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-              <span style={{ fontSize: '24px', fontWeight: 700, color: 'var(--color-motive-dark-blue)' }}>{wordCount}</span>
-              <span style={{ fontSize: '12px', color: 'var(--color-dark-gray)' }}>words /</span>
-              <span style={{ fontSize: '24px', fontWeight: 700, color: 'var(--color-motive-dark-blue)' }}>{charCount}</span>
-              <span style={{ fontSize: '12px', color: 'var(--color-dark-gray)' }}>characters</span>
-            </div>
-            <span style={{ fontSize: '10px', color: 'var(--color-dark-gray)', marginTop: '8px', textTransform: 'uppercase' }}>Maximum 5000 Characters</span>
-          </div>
-
-          {/* ERA Cycle AI */}
-          <div style={{ 
-            flex: 1, 
-            backgroundColor: 'var(--color-motive-dark-blue)', 
-            borderRadius: '12px', 
-            padding: '24px',
-            color: 'white',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center'
-          }}>
-            <h4 style={{ fontSize: '10px', color: 'rgba(255,255,255,0.7)', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '8px' }}>ERA Cycle AI</h4>
-            <div style={{ fontSize: '16px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span>Insights Ready</span>
-              <span>✨</span>
-            </div>
-            <Button style={{ backgroundColor: 'var(--color-motive-light-blue)', color: 'white', width: '100%', padding: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer' }}>
-              ⚡ Extract AI Insights
-            </Button>
-          </div>
-
         </div>
       </div>
     </div>

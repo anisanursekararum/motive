@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/Button';
+import { FiShield, FiLock } from 'react-icons/fi';
 
 export default function LandingPage() {
   const { user, signInWithGoogle, loading } = useAuth();
@@ -37,22 +38,28 @@ export default function LandingPage() {
       {/* Header */}
       <header style={{ display: 'flex', justifyContent: 'space-between', padding: '24px 48px', alignItems: 'center' }}>
         <h1 style={{ color: 'var(--color-motive-dark-blue)', margin: 0, fontSize: '24px' }}>Motive</h1>
-        <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
+        {/* <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
           <span style={{ color: 'var(--color-dark-gray)', fontSize: '14px', cursor: 'pointer' }}>Reflections</span>
           <span style={{ color: 'var(--color-dark-gray)', fontSize: '14px', cursor: 'pointer' }}>Privacy</span>
           <Button onClick={handleLogin}>Get Started</Button>
-        </div>
+        </div> */}
       </header>
 
       {/* Hero Section */}
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '64px 24px' }}>
         <div style={{ maxWidth: '1200px', width: '100%', display: 'flex', gap: '48px', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ flex: 1, maxWidth: '500px' }}>
-            <div style={{ display: 'inline-block', backgroundColor: 'var(--color-motive-light-blue)', color: 'white', padding: '4px 12px', borderRadius: '16px', fontSize: '12px', fontWeight: 'bold', marginBottom: '24px' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: 'var(--color-motive-light-blue)', color: 'white', padding: '4px 12px', borderRadius: '16px', fontSize: '12px', fontWeight: 'bold', marginBottom: '24px' }}>
               Local-first productivity
             </div>
             <h2 style={{ fontSize: '48px', fontWeight: 'bold', color: 'var(--color-motive-dark-blue)', lineHeight: 1.1, marginBottom: '24px' }}>
-              Productivity through Reflective precision.
+              Productivity
+            </h2>
+            <h2 style={{ fontSize: '48px', fontWeight: 'bold', color: 'var(--color-motive-dark-blue)', lineHeight: 1.1, marginBottom: '24px' }}>
+              through <span style={{ color: 'var(--color-motive-light-blue)' }}>Reflective</span>
+            </h2>
+            <h2 style={{ fontSize: '48px', fontWeight: 'bold', color: 'var(--color-motive-light-blue)', lineHeight: 1.1, marginBottom: '24px' }}>
+              precision.
             </h2>
             <p style={{ fontSize: '16px', color: 'var(--color-dark-gray)', marginBottom: '32px', lineHeight: 1.5 }}>
               Motive isn't just a task manager. It's a professional thinking system built on the ERA cycle to turn your daily actions into long-term growth.
@@ -74,10 +81,18 @@ export default function LandingPage() {
                <div style={{ width: '300px', height: '600px', backgroundColor: 'var(--color-motive-navy)', borderRadius: '32px', overflow: 'hidden', position: 'relative' }}>
                   {/* Mock phone content */}
                   <div style={{ padding: '24px', color: 'white', paddingTop: '48px' }}>
-                     <h3 style={{ fontSize: '20px', marginBottom: '16px' }}>Reflections</h3>
+                     <h3 style={{ fontSize: '20px', marginBottom: '16px' }}>Summaries</h3>
                      <div style={{ backgroundColor: 'rgba(255,255,255,0.1)', padding: '16px', borderRadius: '12px', marginBottom: '12px' }}>
                         <div style={{ fontSize: '12px', opacity: 0.7 }}>Experience</div>
                         <div style={{ fontSize: '14px' }}>Deep work session was productive.</div>
+                     </div>
+                     <div style={{ backgroundColor: 'rgba(255,255,255,0.1)', padding: '16px', borderRadius: '12px', marginBottom: '12px' }}>
+                        <div style={{ fontSize: '12px', opacity: 0.7 }}>Reflection</div>
+                        <div style={{ fontSize: '14px' }}>Spare your free time as a buffer.</div>
+                     </div>
+                     <div style={{ backgroundColor: 'rgba(255,255,255,0.1)', padding: '16px', borderRadius: '12px', marginBottom: '12px' }}>
+                        <div style={{ fontSize: '12px', opacity: 0.7 }}>Actions</div>
+                        <div style={{ fontSize: '14px' }}>Check your daily time to up to date agenda.</div>
                      </div>
                   </div>
                </div>
@@ -92,11 +107,11 @@ export default function LandingPage() {
            
            <div style={{ display: 'flex', gap: '24px', textAlign: 'left' }}>
               <div style={{ flex: 1, backgroundColor: 'var(--color-white)', padding: '32px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-                 <h4 style={{ color: 'var(--color-motive-dark-blue)', marginBottom: '12px' }}>Local-First Architecture</h4>
+                 <h4 style={{ color: 'var(--color-motive-dark-blue)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}><FiShield /> Local-First Architecture</h4>
                  <p style={{ color: 'var(--color-dark-gray)', fontSize: '14px' }}>Experience lightning-fast performance and offline access. Your data is stored on your device.</p>
               </div>
               <div style={{ flex: 1, backgroundColor: 'var(--color-motive-navy)', color: 'white', padding: '32px', borderRadius: '12px' }}>
-                 <h4 style={{ marginBottom: '12px' }}>Private by Design</h4>
+                 <h4 style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>  <FiLock /> Private by Design</h4>
                  <p style={{ fontSize: '14px', opacity: 0.8 }}>No trackers. No analytics on your content. No selling of your habits. Just pure productivity.</p>
               </div>
            </div>
