@@ -10,8 +10,8 @@ import { FiUploadCloud, FiInfo } from 'react-icons/fi';
 export default function OnboardingPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const fileInputRef = useRef(null);
-  const [selectedFile, setSelectedFile] = useState(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [importing, setImporting] = useState(false);
 
   useEffect(() => {
@@ -20,7 +20,7 @@ export default function OnboardingPage() {
     }
   }, [user, loading, router]);
 
-  const handleFileChange = (e) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setSelectedFile(file);
@@ -33,7 +33,7 @@ export default function OnboardingPage() {
     setImporting(true);
     const reader = new FileReader();
     reader.onload = async (event) => {
-      const result = await importData(event.target.result);
+      const result = await importData(event.target?.result as string);
       setImporting(false);
       if (result.success) {
         localStorage.setItem('hasCompletedOnboarding', 'true');
@@ -63,7 +63,7 @@ export default function OnboardingPage() {
           
           <div style={{ width: '64px', height: '64px', backgroundColor: 'var(--color-motive-light-blue)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px' }}>
             <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '3px solid white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{ width: '12px', height: '12px', backgroundColor: 'white', borderRadius: '50%', transform: 'translate(1px, -2px) rotate(45deg)', clipPath: 'polygon(20% 0%, 0% 20%, 30% 50%, 0% 80%, 20% 100%, 50% 70%, 100% 100%, 100% 0%)' }} /> {/* Checkmark approximation */}
+              <div style={{ width: '12px', height: '12px', backgroundColor: 'white', borderRadius: '50%', transform: 'translate(1px, -2px) rotate(45deg)', clipPath: 'polygon(20% 0%, 0% 20%, 30% 50%, 0% 80%, 20% 100%, 50% 70%, 100% 100%, 100% 0%)' }} />
             </div>
           </div>
           

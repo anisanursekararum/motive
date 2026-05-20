@@ -1,13 +1,15 @@
 "use client";
+
 import React, { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/lib/db';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { Summary } from '@/types';
 
 export function ERASummary() {
   const [loading, setLoading] = useState(false);
-  const [summary, setSummary] = useState(null);
+  const [summary, setSummary] = useState<Summary | null>(null);
 
   const todayStart = new Date();
   todayStart.setHours(0,0,0,0);
@@ -39,7 +41,7 @@ export function ERASummary() {
       
       const data = await response.json();
       
-      const newSummary = {
+      const newSummary: Summary = {
         id: crypto.randomUUID(),
         date: todayStr,
         type: 'daily',

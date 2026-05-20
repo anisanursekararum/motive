@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/lib/db';
@@ -6,31 +7,33 @@ import { v4 as uuidv4 } from 'uuid';
 import { Button } from '@/components/ui/Button';
 import { useSearchParams } from 'next/navigation';
 import { FiPlus } from 'react-icons/fi';
+import { DailyNote } from '@/types';
 
 export function Journaling() {
   const searchParams = useSearchParams();
   const searchQuery = (searchParams?.get('q') || '').toLowerCase();
 
-  const [activeNoteId, setActiveNoteId] = useState(null);
+  const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   
-  // Get notes for today
-  const notes = useLiveQuery(async () => {
+  // Get notes
+  const notes = useLiveQuery(async (): Promise<DailyNote[]> => {
     return await db.daily_notes.reverse().toArray();
   });
 
-  const filteredNotes = useMemo(() => {
+  const filteredNotes = useMemo((): DailyNote[] => {
     if (!notes) return [];
     
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    const pickedDate = new Date(selectedDate);
+    pickedDate.setHours(0, 0, 0, 0);
+    const nextDay = new Date(pickedDate);
+    nextDay.setDate(nextDay.getDate() + 1);
 
     return notes.filter(note => {
       const noteDate = new Date(note.timestamp);
-      if (noteDate < today || noteDate >= tomorrow) return false;
+      if (noteDate < pickedDate || noteDate >= nextDay) return false;
 
       if (searchQuery) {
         const matchTitle = (note.title || '').toLowerCase().includes(searchQuery);
@@ -40,7 +43,7 @@ export function Journaling() {
 
       return true;
     });
-  }, [notes, searchQuery]);
+  }, [notes, searchQuery, selectedDate]);
 
   // Load active note data into form when changed
   useEffect(() => {
@@ -59,20 +62,25 @@ export function Journaling() {
   const saveNote = async () => {
     if (!content.trim() && !title.trim()) return;
     
+    const now = new Date();
+    const picked = new Date(selectedDate);
+    picked.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
+    const finalTimestamp = picked.toISOString();
+
     if (activeNoteId) {
       await db.daily_notes.update(activeNoteId, {
         title: title.trim() || 'Untitled Journal',
         content,
         charCount: content.length,
-        timestamp: new Date().toISOString()
+        timestamp: finalTimestamp
       });
     } else {
-      const newNote = {
+      const newNote: DailyNote = {
         id: uuidv4(),
         title: title.trim() || 'Untitled Journal',
         content,
         charCount: content.length,
-        timestamp: new Date().toISOString()
+        timestamp: finalTimestamp
       };
       await db.daily_notes.add(newNote);
       setActiveNoteId(newNote.id);
@@ -90,7 +98,7 @@ export function Journaling() {
   const activeNoteData = activeNoteId ? filteredNotes.find(n => n.id === activeNoteId) : null;
   const displayDate = activeNoteData 
     ? new Date(activeNoteData.timestamp).toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
-    : new Date().toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    : new Date(selectedDate).toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
   return (
     <div style={{ display: 'flex', gap: '32px', alignItems: 'flex-start', minHeight: '80vh' }}>
@@ -105,15 +113,37 @@ export function Journaling() {
         maxHeight: '80vh',
         overflowY: 'auto'
       }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-          <h2 style={{ fontSize: '20px', color: 'var(--color-motive-dark-blue)', margin: 0, fontWeight: 600 }}>Today's Journal</h2>
-          <button 
-            onClick={handleNewNote}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-dark-gray)' }}
-            title="New Journal"
-          >
-            <FiPlus size={20} />
-          </button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h2 style={{ fontSize: '20px', color: 'var(--color-motive-dark-blue)', margin: 0, fontWeight: 600 }}>Journal</h2>
+            <button 
+              onClick={handleNewNote}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-dark-gray)' }}
+              title="New Journal"
+            >
+              <FiPlus size={20} />
+            </button>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <label style={{ fontSize: '12px', color: 'var(--color-dark-gray)', fontWeight: 600 }}>Pick Date:</label>
+            <input 
+              type="date"
+              value={selectedDate}
+              onChange={(e) => {
+                setSelectedDate(e.target.value);
+                setActiveNoteId(null);
+              }}
+              style={{ 
+                width: '100%', 
+                padding: '8px 12px', 
+                borderRadius: '8px', 
+                border: '1px solid rgba(0,0,0,0.1)', 
+                fontSize: '14px',
+                outline: 'none',
+                fontFamily: 'inherit'
+              }}
+            />
+          </div>
         </div>
         
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>

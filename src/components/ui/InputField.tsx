@@ -1,7 +1,12 @@
 import React from 'react';
 import styles from './ui.module.css';
 
-export function InputField({ label, error, className = '', ...props }) {
+export interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  label?: string;
+  error?: string;
+}
+
+export function InputField({ label, error, className = '', ...props }: InputFieldProps) {
   return (
     <div className={`input-wrapper ${className}`} style={{ marginBottom: '16px', width: '100%' }}>
       {label && <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, fontSize: '14px' }}>{label}</label>}
@@ -11,8 +16,23 @@ export function InputField({ label, error, className = '', ...props }) {
   );
 }
 
-export function TextareaField({ label, value = '', maxLength = 5000, error, onChange, className = '', ...props }) {
-  const handleChange = (e) => {
+export interface TextareaFieldProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+  label?: string;
+  error?: string;
+  value?: string;
+  maxLength?: number;
+}
+
+export function TextareaField({ 
+  label, 
+  value = '', 
+  maxLength = 5000, 
+  error, 
+  onChange, 
+  className = '', 
+  ...props 
+}: TextareaFieldProps) {
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (e.target.value.length <= maxLength) {
       onChange && onChange(e);
     }

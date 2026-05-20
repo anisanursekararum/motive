@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState, useMemo } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/lib/db';
@@ -7,6 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { InputField } from '@/components/ui/InputField';
 import { Chip } from '@/components/ui/Chip';
 import { useSearchParams } from 'next/navigation';
+import { Task } from '@/types';
 
 export function TaskManager() {
   const searchParams = useSearchParams();
@@ -15,25 +17,31 @@ export function TaskManager() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('Work');
-  const [priority, setPriority] = useState('Low');
+  const [priority, setPriority] = useState<'High' | 'Medium' | 'Low'>('Low');
   const [deadline, setDeadline] = useState('');
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   
   const [filterCategory, setFilterCategory] = useState('All Categories');
 
   const tasks = useLiveQuery(() => db.tasks.orderBy('deadline').reverse().toArray());
 
-  const addTask = async (e) => {
+  const addTask = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
     
-    const newTask = {
+    // Merge selectedDate with the picked deadline (time-only HH:MM)
+    const timeStr = deadline.trim() || '23:59';
+    const datePart = selectedDate; // YYYY-MM-DD
+    const mergedDate = new Date(`${datePart}T${timeStr}:00`);
+
+    const newTask: Task = {
       id: uuidv4(),
       title,
       description,
       status: 'pending',
       category,
       priority,
-      deadline: deadline ? new Date(deadline).toISOString() : new Date().toISOString(),
+      deadline: mergedDate.toISOString(),
       completedAt: null,
       createdAt: new Date().toISOString()
     };
@@ -44,7 +52,7 @@ export function TaskManager() {
     setDeadline('');
   };
 
-  const toggleTaskStatus = async (task) => {
+  const toggleTaskStatus = async (task: Task) => {
     const isCompleted = task.status === 'completed';
     await db.tasks.update(task.id, {
       status: isCompleted ? 'pending' : 'completed',
@@ -52,23 +60,23 @@ export function TaskManager() {
     });
   };
 
-  const deleteTask = async (taskId) => {
+  const deleteTask = async (taskId: string) => {
     await db.tasks.delete(taskId);
   };
 
-  // Filter Tasks for "Today" and by category/search
-  const filteredTasks = useMemo(() => {
+  // Filter Tasks based on selectedDate and category/search
+  const filteredTasks = useMemo((): Task[] => {
     if (!tasks) return [];
     
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    const pickedDate = new Date(selectedDate);
+    pickedDate.setHours(0, 0, 0, 0);
+    const nextDay = new Date(pickedDate);
+    nextDay.setDate(nextDay.getDate() + 1);
 
     return tasks.filter(task => {
-      // Date filter (only today)
+      // Date filter (only pickedDate)
       const taskDate = task.deadline ? new Date(task.deadline) : new Date(task.createdAt);
-      if (taskDate < today || taskDate >= tomorrow) return false;
+      if (taskDate < pickedDate || taskDate >= nextDay) return false;
 
       // Category filter
       if (filterCategory !== 'All Categories' && task.category !== filterCategory) return false;
@@ -82,7 +90,7 @@ export function TaskManager() {
 
       return true;
     });
-  }, [tasks, filterCategory, searchQuery]);
+  }, [tasks, filterCategory, searchQuery, selectedDate]);
 
   const pendingTasks = filteredTasks.filter(t => t.status === 'pending');
   const completedTasks = filteredTasks.filter(t => t.status === 'completed');
@@ -90,7 +98,7 @@ export function TaskManager() {
   const percentCompleted = totalTasks === 0 ? 0 : Math.round((completedTasks.length / totalTasks) * 100);
 
   // Format today's date for the header
-  const todayDateString = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+  const headerDateString = new Date(selectedDate).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
 
   return (
     <div style={{ display: 'flex', gap: '32px', alignItems: 'flex-start' }}>
@@ -101,7 +109,8 @@ export function TaskManager() {
         backgroundColor: 'var(--color-white)', 
         borderRadius: '12px', 
         padding: '24px', 
-        boxShadow: '0 2px 8px rgba(0,0,0,0.08)' 
+        boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+        borderTop: '4px solid var(--color-motive-dark-blue)'
       }}>
         <h2 style={{ fontSize: '20px', color: 'var(--color-motive-dark-blue)', marginBottom: '24px', fontWeight: 600 }}>New Objective</h2>
         
@@ -156,7 +165,7 @@ export function TaskManager() {
             </div>
             <div style={{ flex: 1 }}>
               <label style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-dark-gray)', display: 'block', marginBottom: '8px' }}>Priority</label>
-              <select value={priority} onChange={e => setPriority(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '14px', backgroundColor: '#f9fafb', outline: 'none' }}>
+              <select value={priority} onChange={e => setPriority(e.target.value as 'High' | 'Medium' | 'Low')} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '14px', backgroundColor: '#f9fafb', outline: 'none' }}>
                 <option value="High">High</option>
                 <option value="Medium">Medium</option>
                 <option value="Low">Low</option>
@@ -165,9 +174,9 @@ export function TaskManager() {
           </div>
 
           <div>
-            <label style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-dark-gray)', display: 'block', marginBottom: '8px' }}>Due Date</label>
+            <label style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-dark-gray)', display: 'block', marginBottom: '8px' }}>Due Time (HH:MM)</label>
             <input 
-              type="datetime-local" 
+              type="time" 
               value={deadline} 
               onChange={e => setDeadline(e.target.value)} 
               style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '14px', backgroundColor: '#f9fafb', outline: 'none' }}
@@ -227,7 +236,7 @@ export function TaskManager() {
         {/* Header */}
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h1 style={{ fontSize: '28px', color: 'var(--color-motive-dark-blue)', fontWeight: 700, margin: 0 }}>Today's Tasks</h1>
+            <h1 style={{ fontSize: '28px', color: 'var(--color-motive-dark-blue)', fontWeight: 700, margin: 0 }}>Tasks</h1>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <span style={{ fontSize: '14px', color: 'var(--color-dark-gray)' }}>Filter by:</span>
               <select 
@@ -243,9 +252,20 @@ export function TaskManager() {
               </select>
             </div>
           </div>
-          <p style={{ color: 'var(--color-dark-gray)', margin: '8px 0 0 0', fontSize: '14px' }}>
-            {todayDateString}
-          </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '14px', color: 'var(--color-dark-gray)', fontWeight: 600 }}>Pick Date:</span>
+              <input 
+                type="date"
+                value={selectedDate}
+                onChange={e => setSelectedDate(e.target.value)}
+                style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '14px', backgroundColor: 'white', outline: 'none', cursor: 'pointer' }}
+              />
+            </div>
+            <p style={{ color: 'var(--color-dark-gray)', margin: 0, fontSize: '14px', fontWeight: 500 }}>
+              {headerDateString}
+            </p>
+          </div>
         </div>
 
         {/* Task List */}

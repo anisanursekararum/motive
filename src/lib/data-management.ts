@@ -1,17 +1,24 @@
 import { db } from './db';
+import { Task, DailyNote, Summary } from '@/types';
 
-export async function exportData() {
+export interface BackupData {
+  tasks?: Task[];
+  daily_notes?: DailyNote[];
+  summaries?: Summary[];
+}
+
+export async function exportData(): Promise<string> {
   const tasks = await db.tasks.toArray();
   const daily_notes = await db.daily_notes.toArray();
   const summaries = await db.summaries.toArray();
   
-  const data = { tasks, daily_notes, summaries };
+  const data: BackupData = { tasks, daily_notes, summaries };
   return JSON.stringify(data, null, 2);
 }
 
-export async function importData(jsonData) {
+export async function importData(jsonData: string): Promise<{ success: boolean; error?: string }> {
   try {
-    const data = JSON.parse(jsonData);
+    const data = JSON.parse(jsonData) as BackupData;
     
     // Validate schema basic
     if (data.tasks && Array.isArray(data.tasks)) {
@@ -25,12 +32,12 @@ export async function importData(jsonData) {
     }
     
     return { success: true };
-  } catch (error) {
-    return { success: false, error: error.message };
+  } catch (error: any) {
+    return { success: false, error: error?.message || 'Unknown import error' };
   }
 }
 
-export function downloadJsonFile(jsonData, filename = 'motive_backup.json') {
+export function downloadJsonFile(jsonData: string, filename = 'motive_backup.json'): void {
   const blob = new Blob([jsonData], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');

@@ -3,7 +3,6 @@
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import Image from 'next/image';
 import { Button } from '@/components/ui/Button';
 import { FiShield, FiLock } from 'react-icons/fi';
 
@@ -38,11 +37,6 @@ export default function LandingPage() {
       {/* Header */}
       <header style={{ display: 'flex', justifyContent: 'space-between', padding: '24px 48px', alignItems: 'center' }}>
         <h1 style={{ color: 'var(--color-motive-dark-blue)', margin: 0, fontSize: '24px' }}>Motive</h1>
-        {/* <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
-          <span style={{ color: 'var(--color-dark-gray)', fontSize: '14px', cursor: 'pointer' }}>Reflections</span>
-          <span style={{ color: 'var(--color-dark-gray)', fontSize: '14px', cursor: 'pointer' }}>Privacy</span>
-          <Button onClick={handleLogin}>Get Started</Button>
-        </div> */}
       </header>
 
       {/* Hero Section */}
