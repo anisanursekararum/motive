@@ -37,6 +37,10 @@ export default function OnboardingPage() {
       setImporting(false);
       if (result.success) {
         localStorage.setItem('hasCompletedOnboarding', 'true');
+        // Auto-launch the onboarding tour on first-time login
+        localStorage.setItem('motive_tour_active', 'true');
+        localStorage.setItem('motive_tour_step', '0');
+        localStorage.setItem('motive_tour_completed', 'true');
         router.push('/tasks');
       } else {
         alert("Failed to import data: " + result.error);
@@ -47,19 +51,23 @@ export default function OnboardingPage() {
 
   const handleSkip = () => {
     localStorage.setItem('hasCompletedOnboarding', 'true');
+    // Auto-launch the onboarding tour on first-time login
+    localStorage.setItem('motive_tour_active', 'true');
+    localStorage.setItem('motive_tour_step', '0');
+    localStorage.setItem('motive_tour_completed', 'true');
     router.push('/tasks');
   };
 
   if (loading || !user) return null;
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--color-light-gray)' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--surface-bg)' }}>
       <div style={{ display: 'flex', gap: '64px', maxWidth: '1000px', width: '100%', padding: '48px', alignItems: 'center' }}>
         
         {/* Left Side */}
         <div style={{ flex: 1 }}>
-          <h1 style={{ color: 'var(--color-motive-dark-blue)', fontSize: '32px', marginBottom: '8px' }}>Motive</h1>
-          <p style={{ color: 'var(--color-dark-gray)', marginBottom: '48px' }}>Productivity System</p>
+          <h1 style={{ color: 'var(--logo-color)', fontSize: '32px', marginBottom: '8px' }}>Motive</h1>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '48px' }}>Productivity System</p>
           
           <div style={{ width: '64px', height: '64px', backgroundColor: 'var(--color-motive-light-blue)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px' }}>
             <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '3px solid white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -67,19 +75,19 @@ export default function OnboardingPage() {
             </div>
           </div>
           
-          <h2 style={{ fontSize: '32px', color: 'var(--color-motive-dark-blue)', marginBottom: '16px' }}>Login Successful</h2>
-          <p style={{ color: 'var(--color-dark-gray)', lineHeight: 1.5 }}>
+          <h2 style={{ fontSize: '32px', color: 'var(--text-primary)', marginBottom: '16px' }}>Login Successful</h2>
+          <p style={{ color: 'var(--text-secondary)', lineHeight: 1.5 }}>
             Welcome to your focus center.<br/>
             Would you like to bring your previous data with you?
           </p>
         </div>
 
         {/* Right Side Card */}
-        <div style={{ flex: 1, backgroundColor: 'white', borderRadius: '16px', padding: '40px', boxShadow: '0 8px 32px rgba(0,0,0,0.08)' }}>
-          <h3 style={{ fontSize: '20px', color: 'var(--color-black)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ flex: 1, backgroundColor: 'var(--surface-card)', borderRadius: '16px', padding: '40px', boxShadow: 'var(--shadow-level-2)' }}>
+          <h3 style={{ fontSize: '20px', color: 'var(--text-primary)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <FiUploadCloud style={{ color: 'var(--color-motive-light-blue)' }} /> Import Data
           </h3>
-          <p style={{ color: 'var(--color-dark-gray)', fontSize: '14px', marginBottom: '32px', lineHeight: 1.5 }}>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '32px', lineHeight: 1.5 }}>
             Importing your backup file will automatically restore all previous sessions, tasks, and notes. This helps you pick up exactly where you left off.
           </p>
 
@@ -91,7 +99,7 @@ export default function OnboardingPage() {
               padding: '48px 24px', 
               textAlign: 'center',
               cursor: 'pointer',
-              backgroundColor: 'var(--color-light-gray)',
+              backgroundColor: 'var(--surface-input)',
               marginBottom: '24px',
               transition: 'all 0.2s'
             }}
@@ -103,11 +111,11 @@ export default function OnboardingPage() {
               ref={fileInputRef} 
               onChange={handleFileChange}
             />
-            <FiUploadCloud style={{ fontSize: '32px', color: 'var(--color-dark-gray)', marginBottom: '16px' }} />
-            <div style={{ fontWeight: '600', color: 'var(--color-black)', marginBottom: '4px' }}>
+            <FiUploadCloud style={{ fontSize: '32px', color: 'var(--text-muted)', marginBottom: '16px' }} />
+            <div style={{ fontWeight: '600', color: 'var(--text-primary)', marginBottom: '4px' }}>
               {selectedFile ? selectedFile.name : 'Drop your backup file here'}
             </div>
-            <div style={{ fontSize: '12px', color: 'var(--color-dark-gray)' }}>Only .JSON files are supported</div>
+            <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Only .JSON files are supported</div>
             
             {!selectedFile && (
               <Button variant="secondary" style={{ marginTop: '16px', padding: '8px 16px' }} onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}>
@@ -116,9 +124,9 @@ export default function OnboardingPage() {
             )}
           </div>
 
-          <div style={{ display: 'flex', gap: '12px', backgroundColor: 'var(--color-light-gray)', padding: '16px', borderRadius: '8px', marginBottom: '32px' }}>
+          <div style={{ display: 'flex', gap: '12px', backgroundColor: 'var(--surface-input)', padding: '16px', borderRadius: '8px', marginBottom: '32px' }}>
             <FiInfo style={{ color: 'var(--color-motive-light-blue)', flexShrink: 0, marginTop: '2px' }} />
-            <span style={{ fontSize: '12px', color: 'var(--color-dark-gray)', lineHeight: 1.4 }}>
+            <span style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
               This process will merge the uploaded data with your current account profile.
             </span>
           </div>

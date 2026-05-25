@@ -33,10 +33,10 @@ export default function LandingPage() {
   if (loading) return null;
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-light-gray)', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--surface-bg)', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
       <header style={{ display: 'flex', justifyContent: 'space-between', padding: '24px 48px', alignItems: 'center' }}>
-        <h1 style={{ color: 'var(--color-motive-dark-blue)', margin: 0, fontSize: '24px' }}>Motive</h1>
+        <h1 style={{ color: 'var(--logo-color)', margin: 0, fontSize: '24px' }}>Motive</h1>
       </header>
 
       {/* Hero Section */}
@@ -55,22 +55,22 @@ export default function LandingPage() {
             <h2 style={{ fontSize: '48px', fontWeight: 'bold', color: 'var(--color-motive-light-blue)', lineHeight: 1.1, marginBottom: '24px' }}>
               precision.
             </h2>
-            <p style={{ fontSize: '16px', color: 'var(--color-dark-gray)', marginBottom: '32px', lineHeight: 1.5 }}>
+            <p style={{ fontSize: '16px', color: 'var(--text-secondary)', marginBottom: '32px', lineHeight: 1.5 }}>
               Motive isn't just a task manager. It's a professional thinking system built on the ERA cycle to turn your daily actions into long-term growth.
             </p>
             <Button onClick={handleLogin} style={{ width: '100%', padding: '16px', fontSize: '16px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '12px' }}>
               Continue with Google
             </Button>
-            <p style={{ fontSize: '12px', color: 'var(--color-dark-gray)', marginTop: '16px', textAlign: 'center' }}>
+            <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '16px', textAlign: 'center' }}>
               No credit card required. Private by design.
             </p>
           </div>
           <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
             <div style={{ 
-              backgroundColor: 'var(--color-white)', 
+              backgroundColor: 'var(--surface-card)', 
               borderRadius: '24px', 
               padding: '16px',
-              boxShadow: '0 24px 48px rgba(0,0,0,0.1)'
+              boxShadow: 'var(--shadow-level-2)'
             }}>
                <div style={{ width: '300px', height: '600px', backgroundColor: 'var(--color-motive-navy)', borderRadius: '32px', overflow: 'hidden', position: 'relative' }}>
                   {/* Mock phone content */}
@@ -97,12 +97,12 @@ export default function LandingPage() {
         {/* Features Section */}
         <div style={{ marginTop: '120px', textAlign: 'center', maxWidth: '800px' }}>
            <h3 style={{ fontSize: '24px', color: 'var(--color-motive-dark-blue)', marginBottom: '16px' }}>Your data, your sanctuary.</h3>
-           <p style={{ color: 'var(--color-dark-gray)', marginBottom: '48px' }}>We believe focus requires total trust. Motive is built on a local-first architecture where your reflections never leave your device unless you want them to.</p>
+           <p style={{ color: 'var(--text-secondary)', marginBottom: '48px' }}>We believe focus requires total trust. Motive is built on a local-first architecture where your reflections never leave your device unless you want them to.</p>
            
            <div style={{ display: 'flex', gap: '24px', textAlign: 'left' }}>
-              <div style={{ flex: 1, backgroundColor: 'var(--color-white)', padding: '32px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+              <div style={{ flex: 1, backgroundColor: 'var(--surface-card)', padding: '32px', borderRadius: '12px', boxShadow: 'var(--shadow-level-1)' }}>
                  <h4 style={{ color: 'var(--color-motive-dark-blue)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}><FiShield /> Local-First Architecture</h4>
-                 <p style={{ color: 'var(--color-dark-gray)', fontSize: '14px' }}>Experience lightning-fast performance and offline access. Your data is stored on your device.</p>
+                 <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Experience lightning-fast performance and offline access. Your data is stored on your device.</p>
               </div>
               <div style={{ flex: 1, backgroundColor: 'var(--color-motive-navy)', color: 'white', padding: '32px', borderRadius: '12px' }}>
                  <h4 style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>  <FiLock /> Private by Design</h4>
@@ -114,11 +114,11 @@ export default function LandingPage() {
       </main>
       
       {/* Footer */}
-      <footer style={{ padding: '48px', borderTop: '1px solid rgba(0,0,0,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      <footer style={{ padding: '48px', borderTop: '1px solid var(--divider-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
          <div>
             <div style={{ fontWeight: 'bold', color: 'var(--color-motive-dark-blue)' }}>Motive</div>
-            <div style={{ fontSize: '12px', color: 'var(--color-dark-gray)', marginTop: '8px' }}>The reflective productivity system for modern professionals.</div>
-            <div style={{ fontSize: '12px', color: 'var(--color-dark-gray)', marginTop: '48px' }}>© 2026 Motive. Local-first, privacy-forward.</div>
+            <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '8px' }}>The reflective productivity system for modern professionals.</div>
+            <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '48px' }}>© 2026 Motive. Local-first, privacy-forward.</div>
          </div>
       </footer>
     </div>

@@ -2,6 +2,8 @@ import React from "react";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
+import { ThemeProvider } from "@/context/ThemeContext";
+import { LanguageProvider } from "@/context/LanguageContext";
 import type { Metadata } from "next";
 
 const inter = Inter({
@@ -16,10 +18,33 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable}`}>
+    <html lang="en" className={`${inter.variable}`} suppressHydrationWarning>
+      <head>
+        {/* Prevent FOUC: apply stored theme before paint */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('motive_theme') || 'system';
+                  var resolved = theme;
+                  if (theme === 'system') {
+                    resolved = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                  }
+                  document.documentElement.setAttribute('data-theme', resolved);
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body>
         <AuthProvider>
-          {children}
+          <ThemeProvider>
+            <LanguageProvider>
+              {children}
+            </LanguageProvider>
+          </ThemeProvider>
         </AuthProvider>
       </body>
     </html>

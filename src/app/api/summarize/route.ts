@@ -6,11 +6,12 @@ interface SummarizeRequestPayload {
   tasks: Task[];
   notes: DailyNote[];
   dateRange?: string;
+  language?: 'en' | 'id';
 }
 
 export async function POST(request: NextRequest): Promise<Response> {
   try {
-    const { tasks, notes, dateRange }: SummarizeRequestPayload = await request.json();
+    const { tasks, notes, dateRange, language }: SummarizeRequestPayload = await request.json();
     
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
@@ -20,11 +21,17 @@ export async function POST(request: NextRequest): Promise<Response> {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
+    const langInstructions = language === 'id'
+      ? "CRITICAL: You MUST write all the textual explanations (for 'experience', 'reflection', 'action', and dailyHighlights 'highlight' attributes) completely in Bahasa Indonesia (Indonesian)."
+      : "CRITICAL: You MUST write all the textual explanations (for 'experience', 'reflection', 'action', and dailyHighlights 'highlight' attributes) completely in English.";
+
     const prompt = `
       You are an expert productivity coach and AI analyst. Analyze the following user data (tasks and journal notes) for the period ${dateRange || 'today'} and generate an Executive Reflection & Analysis (ERA) summary.
       
       Tasks: ${JSON.stringify(tasks)}
       Notes: ${JSON.stringify(notes)}
+      
+      ${langInstructions}
       
       Please structure your response strictly in JSON format matching this schema. Focus on deep, professional, highly contextual, and non-generic insights that strictly correspond to the provided tasks and notes. If tasks or notes are empty, use the current period information to construct a realistic encouraging baseline, but if there is data, analyze it thoroughly:
       {

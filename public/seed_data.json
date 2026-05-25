@@ -1,0 +1,167 @@
+{
+  "tasks": [
+    { "id": "task-0510-1", "title": "Review Q2 project roadmap", "description": "Go through the Q2 planning doc and flag blockers.", "status": "completed", "category": "Work", "priority": "High", "deadline": "2026-05-10T17:00:00+07:00", "completedAt": "2026-05-10T16:30:00+07:00", "createdAt": "2026-05-10T08:00:00+07:00" },
+    { "id": "task-0510-2", "title": "Morning run 5km", "description": null, "status": "completed", "category": "Health", "priority": "Medium", "deadline": "2026-05-10T07:00:00+07:00", "completedAt": "2026-05-10T06:55:00+07:00", "createdAt": "2026-05-10T06:00:00+07:00" },
+    { "id": "task-0510-3", "title": "Read chapter 3 of Atomic Habits", "description": null, "status": "pending", "category": "Personal", "priority": "Low", "deadline": "2026-05-10T22:00:00+07:00", "completedAt": null, "createdAt": "2026-05-10T09:00:00+07:00" },
+
+    { "id": "task-0511-1", "title": "Write unit tests for auth module", "description": "Cover login, logout, and token refresh flows.", "status": "completed", "category": "Work", "priority": "High", "deadline": "2026-05-11T18:00:00+07:00", "completedAt": "2026-05-11T17:45:00+07:00", "createdAt": "2026-05-11T08:00:00+07:00" },
+    { "id": "task-0511-2", "title": "Grocery shopping", "description": "Veggies, protein, and snacks for the week.", "status": "completed", "category": "Personal", "priority": "Medium", "deadline": "2026-05-11T19:00:00+07:00", "completedAt": "2026-05-11T18:30:00+07:00", "createdAt": "2026-05-11T10:00:00+07:00" },
+    { "id": "task-0511-3", "title": "Meditate 15 minutes", "description": null, "status": "completed", "category": "Health", "priority": "Low", "deadline": "2026-05-11T07:30:00+07:00", "completedAt": "2026-05-11T07:20:00+07:00", "createdAt": "2026-05-11T06:30:00+07:00" },
+
+    { "id": "task-0512-1", "title": "Fix Firestore security rules", "description": "Restrict reads to authenticated users only.", "status": "completed", "category": "Work", "priority": "High", "deadline": "2026-05-12T12:00:00+07:00", "completedAt": "2026-05-12T11:50:00+07:00", "createdAt": "2026-05-12T08:00:00+07:00" },
+    { "id": "task-0512-2", "title": "Study Cloud Functions docs", "description": "Focus on HTTP triggers and environment variables.", "status": "completed", "category": "Study", "priority": "High", "deadline": "2026-05-12T20:00:00+07:00", "completedAt": "2026-05-12T19:30:00+07:00", "createdAt": "2026-05-12T13:00:00+07:00" },
+    { "id": "task-0512-3", "title": "Clean desk and workspace", "description": null, "status": "pending", "category": "Personal", "priority": "Low", "deadline": "2026-05-12T21:00:00+07:00", "completedAt": null, "createdAt": "2026-05-12T09:00:00+07:00" },
+
+    { "id": "task-0513-1", "title": "Deploy Cloud Function for Gemini proxy", "description": "Set up API proxy so the frontend calls the function instead of Gemini directly.", "status": "completed", "category": "Work", "priority": "High", "deadline": "2026-05-13T17:00:00+07:00", "completedAt": "2026-05-13T16:45:00+07:00", "createdAt": "2026-05-13T08:00:00+07:00" },
+    { "id": "task-0513-2", "title": "Yoga session 30 minutes", "description": null, "status": "completed", "category": "Health", "priority": "Medium", "deadline": "2026-05-13T07:30:00+07:00", "completedAt": "2026-05-13T07:28:00+07:00", "createdAt": "2026-05-13T06:30:00+07:00" },
+    { "id": "task-0513-3", "title": "Update portfolio with new project", "description": null, "status": "pending", "category": "Personal", "priority": "Medium", "deadline": "2026-05-13T22:00:00+07:00", "completedAt": null, "createdAt": "2026-05-13T10:00:00+07:00" },
+
+    { "id": "task-0514-1", "title": "Team standup & sprint planning", "description": "Align on priorities for the week.", "status": "completed", "category": "Work", "priority": "High", "deadline": "2026-05-14T10:00:00+07:00", "completedAt": "2026-05-14T10:00:00+07:00", "createdAt": "2026-05-14T08:00:00+07:00" },
+    { "id": "task-0514-2", "title": "Read article on productivity systems", "description": null, "status": "completed", "category": "Personal", "priority": "Low", "deadline": "2026-05-14T21:00:00+07:00", "completedAt": "2026-05-14T20:45:00+07:00", "createdAt": "2026-05-14T09:00:00+07:00" },
+    { "id": "task-0514-3", "title": "Pay monthly bills", "description": "Electricity, internet, and subscription fees.", "status": "completed", "category": "Personal", "priority": "High", "deadline": "2026-05-14T15:00:00+07:00", "completedAt": "2026-05-14T14:30:00+07:00", "createdAt": "2026-05-14T08:30:00+07:00" },
+
+    { "id": "task-0515-1", "title": "Implement ERA summary UI", "description": "Build the card layout for Experience, Reflection, Action.", "status": "completed", "category": "Work", "priority": "High", "deadline": "2026-05-15T18:00:00+07:00", "completedAt": "2026-05-15T17:30:00+07:00", "createdAt": "2026-05-15T08:00:00+07:00" },
+    { "id": "task-0515-2", "title": "Cook a healthy meal prep", "description": "Prep lunches for Mon–Wed.", "status": "completed", "category": "Health", "priority": "Medium", "deadline": "2026-05-15T13:00:00+07:00", "completedAt": "2026-05-15T12:45:00+07:00", "createdAt": "2026-05-15T10:00:00+07:00" },
+    { "id": "task-0515-3", "title": "Watch lecture on system design", "description": null, "status": "pending", "category": "Study", "priority": "Medium", "deadline": "2026-05-15T22:00:00+07:00", "completedAt": null, "createdAt": "2026-05-15T09:00:00+07:00" },
+
+    { "id": "task-0516-1", "title": "Fix bug: notes not saving on refresh", "description": "IndexedDB write timing issue.", "status": "completed", "category": "Work", "priority": "High", "deadline": "2026-05-16T12:00:00+07:00", "completedAt": "2026-05-16T11:00:00+07:00", "createdAt": "2026-05-16T08:00:00+07:00" },
+    { "id": "task-0516-2", "title": "Walk 10,000 steps", "description": null, "status": "completed", "category": "Health", "priority": "Low", "deadline": "2026-05-16T20:00:00+07:00", "completedAt": "2026-05-16T19:30:00+07:00", "createdAt": "2026-05-16T07:00:00+07:00" },
+    { "id": "task-0516-3", "title": "Reorganize bookmarks", "description": null, "status": "pending", "category": "Personal", "priority": "Low", "deadline": "2026-05-16T22:00:00+07:00", "completedAt": null, "createdAt": "2026-05-16T10:00:00+07:00" },
+
+    { "id": "task-0517-1", "title": "Weekend deep work session: refactor context", "description": "Merge task and note context into one AppContext.", "status": "completed", "category": "Work", "priority": "High", "deadline": "2026-05-17T16:00:00+07:00", "completedAt": "2026-05-17T15:45:00+07:00", "createdAt": "2026-05-17T09:00:00+07:00" },
+    { "id": "task-0517-2", "title": "Call family", "description": null, "status": "completed", "category": "Personal", "priority": "Medium", "deadline": "2026-05-17T19:00:00+07:00", "completedAt": "2026-05-17T18:30:00+07:00", "createdAt": "2026-05-17T10:00:00+07:00" },
+    { "id": "task-0517-3", "title": "Plan next week schedule", "description": null, "status": "completed", "category": "Personal", "priority": "Medium", "deadline": "2026-05-17T21:00:00+07:00", "completedAt": "2026-05-17T20:30:00+07:00", "createdAt": "2026-05-17T10:30:00+07:00" },
+
+    { "id": "task-0518-1", "title": "Research Resend email API", "description": "Compare with SendGrid for transactional emails.", "status": "completed", "category": "Study", "priority": "Medium", "deadline": "2026-05-18T14:00:00+07:00", "completedAt": "2026-05-18T13:50:00+07:00", "createdAt": "2026-05-18T09:00:00+07:00" },
+    { "id": "task-0518-2", "title": "Stretch and recovery session", "description": null, "status": "completed", "category": "Health", "priority": "Low", "deadline": "2026-05-18T08:00:00+07:00", "completedAt": "2026-05-18T07:50:00+07:00", "createdAt": "2026-05-18T07:00:00+07:00" },
+    { "id": "task-0518-3", "title": "Declutter downloads folder", "description": null, "status": "pending", "category": "Personal", "priority": "Low", "deadline": "2026-05-18T22:00:00+07:00", "completedAt": null, "createdAt": "2026-05-18T11:00:00+07:00" },
+
+    { "id": "task-0519-1", "title": "Code review: teammate's PR", "description": "Review the new dashboard component PR.", "status": "completed", "category": "Work", "priority": "High", "deadline": "2026-05-19T11:00:00+07:00", "completedAt": "2026-05-19T10:45:00+07:00", "createdAt": "2026-05-19T08:00:00+07:00" },
+    { "id": "task-0519-2", "title": "Practice TypeScript generics", "description": "Work through exercises on utility types.", "status": "completed", "category": "Study", "priority": "Medium", "deadline": "2026-05-19T20:00:00+07:00", "completedAt": "2026-05-19T19:30:00+07:00", "createdAt": "2026-05-19T13:00:00+07:00" },
+    { "id": "task-0519-3", "title": "Hydrate properly — 2L water goal", "description": null, "status": "completed", "category": "Health", "priority": "Low", "deadline": "2026-05-19T22:00:00+07:00", "completedAt": "2026-05-19T21:00:00+07:00", "createdAt": "2026-05-19T07:00:00+07:00" },
+
+    { "id": "task-0520-1", "title": "Migrate JS components to TypeScript", "description": "Journaling.tsx and TaskManager.tsx first.", "status": "completed", "category": "Work", "priority": "High", "deadline": "2026-05-20T18:00:00+07:00", "completedAt": "2026-05-20T17:55:00+07:00", "createdAt": "2026-05-20T08:00:00+07:00" },
+    { "id": "task-0520-2", "title": "Morning jog 30 min", "description": null, "status": "completed", "category": "Health", "priority": "Medium", "deadline": "2026-05-20T07:00:00+07:00", "completedAt": "2026-05-20T06:58:00+07:00", "createdAt": "2026-05-20T06:00:00+07:00" },
+    { "id": "task-0520-3", "title": "Write journal entry about TS migration", "description": null, "status": "pending", "category": "Personal", "priority": "Low", "deadline": "2026-05-20T22:00:00+07:00", "completedAt": null, "createdAt": "2026-05-20T09:00:00+07:00" },
+
+    { "id": "task-0521-1", "title": "Design Reports dashboard UI", "description": "Sketch layout for date range filter, charts, and ERA card.", "status": "completed", "category": "Work", "priority": "High", "deadline": "2026-05-21T17:00:00+07:00", "completedAt": "2026-05-21T16:40:00+07:00", "createdAt": "2026-05-21T08:00:00+07:00" },
+    { "id": "task-0521-2", "title": "Journaling habit tracking setup", "description": null, "status": "completed", "category": "Personal", "priority": "Medium", "deadline": "2026-05-21T21:00:00+07:00", "completedAt": "2026-05-21T20:45:00+07:00", "createdAt": "2026-05-21T10:00:00+07:00" },
+    { "id": "task-0521-3", "title": "Fix lint warnings in codebase", "description": null, "status": "pending", "category": "Work", "priority": "Low", "deadline": "2026-05-21T22:00:00+07:00", "completedAt": null, "createdAt": "2026-05-21T11:00:00+07:00" },
+
+    { "id": "task-0522-1", "title": "Implement Gemini ERA summary integration", "description": "Wire Cloud Function response to Reports page cards.", "status": "completed", "category": "Work", "priority": "High", "deadline": "2026-05-22T18:00:00+07:00", "completedAt": "2026-05-22T17:30:00+07:00", "createdAt": "2026-05-22T08:00:00+07:00" },
+    { "id": "task-0522-2", "title": "Swim session 45 minutes", "description": null, "status": "completed", "category": "Health", "priority": "Medium", "deadline": "2026-05-22T07:30:00+07:00", "completedAt": "2026-05-22T07:28:00+07:00", "createdAt": "2026-05-22T06:30:00+07:00" },
+    { "id": "task-0522-3", "title": "Read about IndexedDB performance tuning", "description": null, "status": "pending", "category": "Study", "priority": "Medium", "deadline": "2026-05-22T22:00:00+07:00", "completedAt": null, "createdAt": "2026-05-22T12:00:00+07:00" },
+
+    { "id": "task-0523-1", "title": "Seed test data for two-week review", "description": "Import realistic tasks & journal entries to test Reports.", "status": "completed", "category": "Work", "priority": "High", "deadline": "2026-05-23T17:00:00+07:00", "completedAt": "2026-05-23T16:00:00+07:00", "createdAt": "2026-05-23T08:00:00+07:00" },
+    { "id": "task-0523-2", "title": "Stretching + breathing exercises", "description": null, "status": "pending", "category": "Health", "priority": "Low", "deadline": "2026-05-23T07:30:00+07:00", "completedAt": null, "createdAt": "2026-05-23T07:00:00+07:00" },
+    { "id": "task-0523-3", "title": "Weekly review & plan next sprint", "description": null, "status": "pending", "category": "Personal", "priority": "Medium", "deadline": "2026-05-23T21:00:00+07:00", "completedAt": null, "createdAt": "2026-05-23T09:00:00+07:00" }
+  ],
+  "daily_notes": [
+    {
+      "id": "note-0510-1",
+      "title": "Start of the Week",
+      "content": "Hari ini terasa cukup produktif. Berhasil menyelesaikan review roadmap Q2 lebih awal dari jadwal. Sempat merasa sedikit overwhelmed di pagi hari karena banyaknya backlog, tapi setelah memecah pekerjaan menjadi tugas-tugas kecil, semuanya terasa lebih terkendali. Lari pagi 5km juga memberi energi yang bagus untuk memulai hari.",
+      "charCount": 335,
+      "timestamp": "2026-05-10T21:00:00+07:00"
+    },
+    {
+      "id": "note-0511-1",
+      "title": "Testing & Routine",
+      "content": "Unit testing hari ini ternyata mengungkap beberapa edge case di alur token refresh yang sebelumnya tidak terpikirkan. Ini penting! Belanja kebutuhan mingguan juga sudah selesai. Merasa bahwa meditasi 15 menit di pagi hari benar-benar membantu ketenangan mental sebelum masuk ke mode kerja. Ingin menjaga konsistensi ini.",
+      "charCount": 342,
+      "timestamp": "2026-05-11T21:30:00+07:00"
+    },
+    {
+      "id": "note-0512-1",
+      "title": "Cloud Functions Struggle",
+      "content": "Bagian Cloud Functions ternyata lebih rumit dari yang dibayangkan, terutama soal pengelolaan environment variables dan cold start latency. Butuh waktu lebih untuk memahami pola yang benar. Firestore security rules berhasil diperbaiki hari ini, tapi masih ada rasa penasaran apakah sudah cukup aman untuk produksi.",
+      "charCount": 319,
+      "timestamp": "2026-05-12T22:00:00+07:00"
+    },
+    {
+      "id": "note-0512-2",
+      "title": "Evening Reflection",
+      "content": "Malam ini sempat merasa frustrasi karena meja kerja berantakan. Lingkungan yang rapi ternyata berpengaruh besar pada konsentrasi. Besok harus prioritaskan bebersih meja sebelum mulai kerja.",
+      "charCount": 200,
+      "timestamp": "2026-05-12T23:00:00+07:00"
+    },
+    {
+      "id": "note-0513-1",
+      "title": "First Cloud Deployment",
+      "content": "Deploy Cloud Function untuk Gemini proxy akhirnya berhasil! Ini pencapaian besar karena ini pertama kalinya mendeploy fungsi ke Google Cloud secara mandiri. Yoga pagi juga terasa menyegarkan. Masih ada rasa tidak yakin apakah arsitektur proxy ini sudah optimal, tapi setidaknya sudah berjalan.",
+      "charCount": 315,
+      "timestamp": "2026-05-13T21:00:00+07:00"
+    },
+    {
+      "id": "note-0514-1",
+      "title": "Team Sync & Focus",
+      "content": "Sprint planning berjalan lancar hari ini. Tim sepakat untuk fokus pada fitur export/import data minggu ini. Membaca artikel tentang productivity systems membuka perspektif baru tentang pentingnya weekly review—sesuatu yang belum konsisten dilakukan. Ingin mulai menerapkan weekly review mulai akhir pekan ini.",
+      "charCount": 328,
+      "timestamp": "2026-05-14T22:00:00+07:00"
+    },
+    {
+      "id": "note-0515-1",
+      "title": "ERA UI Milestone",
+      "content": "UI untuk ERA summary card berhasil dibuat hari ini! Desainnya terasa bersih dan selaras dengan design system yang sudah ada. Meal prep juga selesai, jadi tidak perlu khawatir soal makan siang untuk beberapa hari ke depan. Merasa sangat produktif dan berenergi. Ini adalah salah satu hari terbaik minggu ini.",
+      "charCount": 328,
+      "timestamp": "2026-05-15T21:00:00+07:00"
+    },
+    {
+      "id": "note-0516-1",
+      "title": "Bug Hunting",
+      "content": "Hari ini dihabiskan untuk memburu bug yang cukup tricky: notes tidak tersimpan saat halaman di-refresh. Ternyata masalahnya ada di timing penulisan ke IndexedDB yang tidak await dengan benar. Senang bisa menemukan dan memperbaiki root cause-nya, bukan hanya symptom-nya. Jalan 10.000 langkah juga tercapai sore ini.",
+      "charCount": 335,
+      "timestamp": "2026-05-16T21:30:00+07:00"
+    },
+    {
+      "id": "note-0517-1",
+      "title": "Weekend Deep Work",
+      "content": "Weekend dimanfaatkan untuk sesi deep work yang fokus pada refactoring context. Menggabungkan TaskContext dan NoteContext menjadi satu AppContext ternyata cukup kompleks, tapi hasilnya kode jadi lebih bersih dan mudah di-maintain. Sudah menelpon keluarga dan merencanakan minggu depan. Merasa reset dan siap untuk minggu baru.",
+      "charCount": 368,
+      "timestamp": "2026-05-17T22:00:00+07:00"
+    },
+    {
+      "id": "note-0518-1",
+      "title": "API Research Day",
+      "content": "Riset Resend vs SendGrid hari ini sangat informatif. Resend tampak lebih developer-friendly dan memiliki free tier yang cukup untuk kebutuhan saat ini. Sesi stretching pagi membantu mengurangi nyeri punggung yang sudah beberapa hari terasa. Perlu lebih konsisten dengan pemanasan sebelum duduk bekerja lama.",
+      "charCount": 320,
+      "timestamp": "2026-05-18T21:00:00+07:00"
+    },
+    {
+      "id": "note-0519-1",
+      "title": "Learning TypeScript Deeply",
+      "content": "Code review PR teammate memberikan perspektif baru tentang bagaimana menulis komponen yang lebih reusable. Latihan TypeScript generics dan utility types terasa challenging tapi sangat bermanfaat. Mulai memahami kenapa TypeScript sangat powerful untuk large codebase. Target 2L air hari ini juga tercapai—tubuh terasa lebih segar.",
+      "charCount": 363,
+      "timestamp": "2026-05-19T22:00:00+07:00"
+    },
+    {
+      "id": "note-0520-1",
+      "title": "TypeScript Migration Complete",
+      "content": "Migrasi Journaling.tsx dan TaskManager.tsx ke TypeScript selesai hari ini. Prosesnya mengungkap beberapa implicit any type yang sebelumnya tersembunyi dan berpotensi menyebabkan bug. TypeScript strict mode memang menyiksa di awal, tapi manfaat jangka panjangnya jelas terasa. Jogging pagi juga menyenangkan—cuaca bagus.",
+      "charCount": 352,
+      "timestamp": "2026-05-20T21:30:00+07:00"
+    },
+    {
+      "id": "note-0521-1",
+      "title": "Dashboard Design Day",
+      "content": "Hari ini fokus merancang UI Reports dashboard. Mencoba beberapa layout sebelum akhirnya settled dengan pendekatan card-based yang menampilkan date range filter di atas, diikuti chart, dan ERA summary di bawah. Habit tracking untuk journaling juga mulai diset up—target satu entri per hari. Semoga konsisten.",
+      "charCount": 350,
+      "timestamp": "2026-05-21T21:00:00+07:00"
+    },
+    {
+      "id": "note-0522-1",
+      "title": "Gemini Integration Working",
+      "content": "Integrasi Gemini untuk ERA summary di Reports page akhirnya bekerja end-to-end! Data dari tasks dan notes dikirim ke Cloud Function, diproses Gemini, dan hasilnya ditampilkan di UI dengan benar. Ini milestone besar untuk proyek ini. Renang pagi juga menyegarkan—olahraga air terasa beda, lebih refreshing dari jogging.",
+      "charCount": 380,
+      "timestamp": "2026-05-22T21:00:00+07:00"
+    },
+    {
+      "id": "note-0523-1",
+      "title": "Two-Week Checkpoint",
+      "content": "Dua minggu terakhir ini sangat padat tapi memuaskan. Dari deploy Cloud Function pertama, migrasi ke TypeScript, sampai integrasi Gemini AI—semua berhasil dicapai. Yang perlu diperbaiki adalah konsistensi habit kecil: meja bersih, membaca buku, dan stretching pagi. Minggu depan ingin fokus pada polish UI dan testing end-to-end yang lebih komprehensif.",
+      "charCount": 390,
+      "timestamp": "2026-05-23T15:30:00+07:00"
+    }
+  ],
+  "summaries": []
+}

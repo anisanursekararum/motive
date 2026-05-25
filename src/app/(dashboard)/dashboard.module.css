@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: var(--color-light-gray);
+  background-color: var(--surface-bg);
 }
 
 .topNav {
@@ -10,8 +10,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px 48px;
-  background-color: var(--color-white);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  background-color: var(--surface-nav);
+  border-bottom: 1px solid var(--divider-color);
   position: fixed;
   top: 0;
   left: 0;
@@ -26,14 +26,14 @@
 }
 
 .logo {
-  color: var(--color-motive-dark-blue);
+  color: var(--logo-color);
   font-size: 24px;
   font-weight: 700;
   margin: 0;
 }
 
 .welcomeText {
-  color: var(--color-dark-gray);
+  color: var(--text-secondary);
   font-size: 14px;
 }
 
@@ -47,19 +47,23 @@
 .searchIcon {
   position: absolute;
   left: 12px;
-  color: var(--color-dark-gray);
+  color: var(--text-muted);
 }
 
 .searchInput {
   width: 100%;
   padding: 8px 12px 8px 36px;
   border-radius: 8px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  background-color: var(--color-white);
+  border: 1px solid var(--border-color);
+  background-color: var(--surface-input);
   font-size: 14px;
-  color: var(--color-black);
+  color: var(--text-primary);
   outline: none;
   transition: all 0.2s ease;
+}
+
+.searchInput::placeholder {
+  color: var(--text-muted);
 }
 
 .searchInput:focus {
@@ -69,7 +73,7 @@
 
 .navLinks {
   display: flex;
-  gap: 24px;
+  gap: 8px;
   align-items: center;
 }
 
@@ -77,22 +81,54 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: var(--color-dark-gray);
+  color: var(--text-secondary);
   text-decoration: none;
   font-weight: 600;
   font-size: 14px;
-  padding-bottom: 4px;
+  padding: 6px 10px 6px 10px;
+  border-radius: 8px;
   border-bottom: 2px solid transparent;
   transition: all 0.2s ease;
 }
 
 .navItem:hover {
   color: var(--color-motive-dark-blue);
+  background-color: var(--chip-bg);
 }
 
 .navItem.active {
   color: var(--color-motive-dark-blue);
   border-bottom-color: var(--color-motive-dark-blue);
+  background-color: var(--chip-bg);
+}
+
+[data-theme="dark"] .navItem:hover,
+[data-theme="dark"] .navItem.active {
+  color: var(--color-motive-light-blue);
+  border-bottom-color: var(--color-motive-light-blue);
+}
+
+/* Theme toggle button */
+.themeToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background-color: var(--surface-input);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.themeToggle:hover {
+  border-color: var(--color-motive-light-blue);
+  color: var(--color-motive-light-blue);
+  background-color: var(--chip-bg);
 }
 
 .mainContent {

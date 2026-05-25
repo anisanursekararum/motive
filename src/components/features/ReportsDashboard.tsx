@@ -5,9 +5,10 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/lib/db';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { FiDownload, FiMail, FiCalendar } from 'react-icons/fi';
+import { FiDownload, FiMail, FiCalendar, FiLoader } from 'react-icons/fi';
 import { useAuth } from '@/context/AuthContext';
 import { Task, DailyNote, Summary } from '@/types';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface VelocityDay {
   date: Date;
@@ -24,10 +25,18 @@ interface FocusSplitItem {
 
 export function ReportsDashboard() {
   const { user } = useAuth();
+  const { t, language } = useLanguage();
   const [dateFilter, setDateFilter] = useState('This Week');
   const [aiLoading, setAiLoading] = useState(false);
+  const [emailSending, setEmailSending] = useState(false);
+  const [hoveredBarIndex, setHoveredBarIndex] = useState<number | null>(null);
+
+  // States for historical report modal & pagination
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  const [historyPage, setHistoryPage] = useState(1);
+  const [selectedHistorySummary, setSelectedHistorySummary] = useState<Summary | null>(null);
   
-  // Custom date picker states (defaulting to last 6 days and today)
+  // Custom date picker states
   const defaultStart = useMemo(() => {
     const d = new Date();
     d.setDate(d.getDate() - 6);
@@ -48,15 +57,11 @@ export function ReportsDashboard() {
     } else if (dateFilter === 'Last Month') {
       start.setDate(end.getDate() - 29);
     } else {
-      // Custom filter date pickers
-      if (customStartDate && customEndDate) {
-        const s = new Date(customStartDate);
-        s.setHours(0,0,0,0);
-        const e = new Date(customEndDate);
-        e.setHours(23,59,59,999);
-        return { start: s, end: e };
-      }
-      start.setDate(end.getDate() - 6);
+      const s = new Date(customStartDate);
+      const e = new Date(customEndDate);
+      s.setHours(0,0,0,0);
+      e.setHours(23,59,59,999);
+      return { start: s, end: e };
     }
     
     start.setHours(0,0,0,0);
@@ -64,7 +69,7 @@ export function ReportsDashboard() {
     return { start, end };
   }, [dateFilter, customStartDate, customEndDate]);
 
-  const dateString = `${dateRange.start.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric'})} - ${dateRange.end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric'})}`;
+  const dateString = `${dateRange.start.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', { month: 'short', day: 'numeric', year: 'numeric'})} - ${dateRange.end.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', { month: 'short', day: 'numeric', year: 'numeric'})}`;
 
   // Fetch data
   const tasks = useLiveQuery(async (): Promise<Task[]> => {
@@ -105,7 +110,7 @@ export function ReportsDashboard() {
     while (current <= dateRange.end) {
       days.push({
         date: new Date(current),
-        label: current.toLocaleDateString('en-US', { weekday: 'short' }),
+        label: current.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', { weekday: 'short' }),
         completed: 0,
         total: 0
       });
@@ -114,7 +119,7 @@ export function ReportsDashboard() {
     
     let displayDays = days;
     if (days.length > 14) {
-       displayDays = days.slice(-14); // keep a readable density
+       displayDays = days.slice(-14);
     }
 
     filteredTasks.forEach(task => {
@@ -140,7 +145,7 @@ export function ReportsDashboard() {
       totalCompleted: filteredTasks.filter(t => t.status === 'completed').length,
       totalCount: filteredTasks.length
     };
-  }, [filteredTasks, dateRange]);
+  }, [filteredTasks, dateRange, language]);
 
   // --- Correct Productivity Velocity Percentage VS Previous Period ---
   const velocityPercentageString = useMemo((): string => {
@@ -191,7 +196,7 @@ export function ReportsDashboard() {
     window.print();
   };
 
-  const handleSendEmail = () => {
+  const handleSendEmail = async () => {
     const savedRecipient = localStorage.getItem('settings_recipientEmail') || user?.email || 'reflection@motive.app';
     
     // Construct email content
@@ -200,50 +205,69 @@ export function ReportsDashboard() {
     let eraText = "";
     if (latestSummary) {
       eraText = `
-WEEKLY COMPREHENSIVE ERA (${latestSummary.dateRangeStr || 'Recent'}):
-- Accomplished (Experience):
-  ${latestSummary.experience || 'No experience details available.'}
+Experience:
+${latestSummary.experience}
 
-- Challenges (Reflection):
-  ${latestSummary.reflection || 'No reflection details available.'}
+Reflection:
+${latestSummary.reflection}
 
-- Action Plan (Action):
-  ${latestSummary.action || 'No action plan details available.'}
-`;
+Action:
+${latestSummary.action}
+      `.trim();
     } else {
-      eraText = `
-WEEKLY COMPREHENSIVE ERA:
-No summaries generated yet.
-`;
+      eraText = "No summaries generated yet.";
     }
 
-    const velocityText = velocityData.data.map(d => `- ${d.label}: ${d.completed} completed / ${d.total} total tasks`).join('\n');
-    const focusText = focusSplitData.map(c => `- ${c.name}: ${c.percentage}% (${c.count} tasks)`).join('\n');
+    const emailSubject = `Motive Productivity & Reflection Report — Period: ${dateString}`;
+    const emailBody = `
+Hi there,
 
-    const bodyText = `
-Motive Reports for ${dateString}
-Report generated on: ${new Date().toLocaleString()}
+Here is your periodic Motive Productivity & Reflection Report.
 
---------------------------------------------------
-PRODUCTIVITY VELOCITY (Completed vs Total Tasks):
-- Period Change: ${velocityPercentageString} vs previous period
-${velocityText}
+Period: ${dateString}
+Productivity Velocity Change: ${velocityPercentageString}
+Total Tasks Scheduled: ${velocityData.totalCount}
+Completed Tasks: ${velocityData.totalCompleted}
 
---------------------------------------------------
-FOCUS SPLIT (Category Work distribution):
-${focusText}
+==================================
+EXECUTIVE REFLECTION & ANALYSIS (ERA)
+==================================
 
---------------------------------------------------
 ${eraText}
 
-Generated by Motive Productivity App - Local-first & Private.
-`;
+==================================
+Keep up the positive momentum and self-reflection!
+Sent directly from Motive App on behalf of anisanursekararum@gmail.com.
+    `.trim();
 
-    const mailtoUrl = `mailto:${savedRecipient}?subject=${encodeURIComponent(`Motive Reports for ${dateString}`)}&body=${encodeURIComponent(bodyText)}`;
-    window.location.href = mailtoUrl;
+    setEmailSending(true);
+    try {
+      const res = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: savedRecipient,
+          subject: emailSubject,
+          body: emailBody
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert(language === 'id'
+          ? `Laporan berhasil dikirim langsung ke ${savedRecipient} dari anisanursekararum@gmail.com!`
+          : `Report successfully sent directly to ${savedRecipient} from anisanursekararum@gmail.com!`);
+      } else {
+        throw new Error(data.error);
+      }
+    } catch (err: any) {
+      alert("Failed to send email directly: " + err.message);
+    } finally {
+      setEmailSending(false);
+    }
   };
 
-  const generateNewERA = async () => {
+  // Generate Report via Gemini Proxied API
+  const handleGenerateReport = async () => {
     setAiLoading(true);
     try {
       const response = await fetch('/api/summarize', {
@@ -252,7 +276,8 @@ Generated by Motive Productivity App - Local-first & Private.
         body: JSON.stringify({ 
           tasks: filteredTasks, 
           notes: filteredNotes,
-          dateRange: dateString
+          dateRange: dateString,
+          language: language
         })
       });
       
@@ -279,6 +304,50 @@ Generated by Motive Productivity App - Local-first & Private.
       setAiLoading(false);
     }
   };
+
+  // Helper function to render paragraphs and points beautifully
+  const formatERAPoints = (text: any) => {
+    if (!text) return null;
+    let str = "";
+    if (typeof text === 'string') {
+      str = text;
+    } else if (Array.isArray(text)) {
+      str = text.join('\n');
+    } else {
+      str = String(text);
+    }
+    const paragraphs = str.split('\n\n').filter(Boolean);
+    return paragraphs.map((para, pIdx) => {
+      const lines = para.split('\n').filter(Boolean);
+      const isList = lines.some(line => /^\s*[-*•\d+.]/.test(line));
+      
+      if (isList) {
+        return (
+          <ul key={pIdx} style={{ margin: '8px 0 16px 20px', paddingLeft: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {lines.map((line, lIdx) => {
+              const cleanLine = line.replace(/^\s*[-*•\d+.]\s*/, '');
+              return (
+                <li key={lIdx} style={{ fontSize: '13px', lineHeight: 1.6, color: 'var(--text-secondary)', textAlign: 'justify' }}>
+                  {cleanLine}
+                </li>
+              );
+            })}
+          </ul>
+        );
+      }
+      
+      return (
+        <p key={pIdx} style={{ fontSize: '13px', lineHeight: 1.6, color: 'var(--text-secondary)', marginBottom: '16px', textAlign: 'justify' }}>
+          {para}
+        </p>
+      );
+    });
+  };
+
+  const historicalSummaries = useMemo(() => {
+    if (!summaries || summaries.length <= 1) return [];
+    return summaries.slice(1);
+  }, [summaries]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', paddingBottom: '48px' }}>
@@ -308,7 +377,7 @@ Generated by Motive Productivity App - Local-first & Private.
         }
       `}} />
 
-      {/* Printable Area - Rendered off-screen normally, visible in window.print() */}
+      {/* Printable Area */}
       <div id="printableReportArea" style={{ display: 'none' }}>
         <div style={{ borderBottom: '3px solid #1A2254', paddingBottom: '16px', marginBottom: '24px' }}>
           <h1 style={{ fontSize: '28px', color: '#1A2254', margin: '0 0 8px 0' }}>Motive Reports</h1>
@@ -330,8 +399,8 @@ Generated by Motive Productivity App - Local-first & Private.
             <tbody>
               {velocityData.data.map((day, idx) => (
                 <tr key={idx} style={{ borderBottom: '1px solid #e2e8f0' }}>
-                  <td style={{ padding: '8px' }}>{day.label}</td>
-                  <td style={{ padding: '8px', fontWeight: 'bold', color: '#1A2254' }}>{day.completed}</td>
+                  <td style={{ padding: '8px' }}>{`${day.date.getDate()}-${day.label}`}</td>
+                  <td style={{ padding: '8px', fontWeight: 'bold', color: '#4A5FD9' }}>{day.completed}</td>
                   <td style={{ padding: '8px' }}>{day.total}</td>
                 </tr>
               ))}
@@ -351,158 +420,167 @@ Generated by Motive Productivity App - Local-first & Private.
               </tr>
             </thead>
             <tbody>
-              {focusSplitData.map((c, idx) => (
+              {focusSplitData.map((item, idx) => (
                 <tr key={idx} style={{ borderBottom: '1px solid #e2e8f0' }}>
-                  <td style={{ padding: '8px', fontWeight: 'bold' }}>{c.name}</td>
-                  <td style={{ padding: '8px' }}>{c.count} tasks</td>
-                  <td style={{ padding: '8px', color: '#4A5FD9', fontWeight: 'bold' }}>{c.percentage}%</td>
+                  <td style={{ padding: '8px', fontWeight: 600 }}>{item.name}</td>
+                  <td style={{ padding: '8px' }}>{item.count}</td>
+                  <td style={{ padding: '8px', fontWeight: 'bold', color: '#4A5FD9' }}>{item.percentage}%</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
 
-        <div>
-          <h3 style={{ fontSize: '18px', color: '#1A2254', borderBottom: '1px solid #e2e8f0', paddingBottom: '6px', marginBottom: '16px' }}>Executive Reflection & Analysis (ERA Summaries)</h3>
-          {summaries && summaries.length > 0 ? (
+        {summaries && summaries.length > 0 && (
+          <div>
+            <h3 style={{ fontSize: '18px', color: '#1A2254', borderBottom: '1px solid #e2e8f0', paddingBottom: '6px', marginBottom: '16px' }}>{language === 'id' ? 'Ringkasan Siklus ERA' : 'ERA Cycle Summary'}</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              <div style={{ borderLeft: '4px solid #4A5FD9', paddingLeft: '16px' }}>
-                <h4 style={{ fontSize: '13px', color: '#4A5FD9', margin: '0 0 6px 0', letterSpacing: '0.5px' }}>ACCOMPLISHED (EXPERIENCE)</h4>
-                <p style={{ fontSize: '13px', margin: 0, lineHeight: '1.5' }}>{summaries[0].experience}</p>
+              <div>
+                <h4 style={{ fontSize: '13px', color: '#4A5FD9', margin: '0 0 6px 0', textTransform: 'uppercase' }}>{language === 'id' ? 'PENCAPAIAN (EXPERIENCE)' : 'Accomplished (Experience)'}</h4>
+                <div>{formatERAPoints(summaries[0].experience)}</div>
               </div>
-              <div style={{ borderLeft: '4px solid #dc2626', paddingLeft: '16px' }}>
-                <h4 style={{ fontSize: '13px', color: '#dc2626', margin: '0 0 6px 0', letterSpacing: '0.5px' }}>CHALLENGES (REFLECTION)</h4>
-                <p style={{ fontSize: '13px', margin: 0, lineHeight: '1.5' }}>{summaries[0].reflection}</p>
+              <div>
+                <h4 style={{ fontSize: '13px', color: '#dc2626', margin: '0 0 6px 0', textTransform: 'uppercase' }}>{language === 'id' ? 'TANTANGAN (REFLECTION)' : 'Challenges (Reflection)'}</h4>
+                <div>{formatERAPoints(summaries[0].reflection)}</div>
               </div>
-              <div style={{ borderLeft: '4px solid #1A2254', paddingLeft: '16px' }}>
-                <h4 style={{ fontSize: '13px', color: '#1A2254', margin: '0 0 6px 0', letterSpacing: '0.5px' }}>ACTION PLAN (ACTION)</h4>
-                <p style={{ fontSize: '13px', margin: 0, lineHeight: '1.5' }}>{summaries[0].action}</p>
+              <div>
+                <h4 style={{ fontSize: '13px', color: '#1A2254', margin: '0 0 6px 0', textTransform: 'uppercase' }}>{language === 'id' ? 'RENCANA KERJA (ACTION)' : 'Action Plan (Action)'}</h4>
+                <div>{formatERAPoints(summaries[0].action)}</div>
               </div>
-              
-              {summaries[0].dailyHighlights && summaries[0].dailyHighlights.length > 0 && (
-                <div style={{ marginTop: '12px', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px' }}>
-                  <h4 style={{ fontSize: '12px', color: '#1A2254', margin: '0 0 10px 0', letterSpacing: '0.5px' }}>DAILY HIGHLIGHTS OVERVIEW:</h4>
-                  <ul style={{ margin: 0, paddingLeft: '20px', lineHeight: '1.6', fontSize: '12px' }}>
-                    {summaries[0].dailyHighlights.map((hl, hlIdx) => (
-                      <li key={hlIdx}>
-                        <strong>{hl.date}:</strong> {hl.highlight}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
             </div>
-          ) : (
-            <div style={{ fontSize: '13px', color: 'var(--color-dark-gray)' }}>No ERA Summaries generated for this range yet.</div>
-          )}
+          </div>
+        )}
+      </div>
+
+      {/* Main UI Header */}
+      <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h1 style={{ fontSize: '28px', color: 'var(--text-primary)', fontWeight: 700, margin: 0 }}>{t('reports')}</h1>
+          <p style={{ color: 'var(--text-secondary)', margin: '4px 0 0 0', fontSize: '14px' }}>
+            {dateString}
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <Button variant="secondary" onClick={handleExportPDF} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <FiDownload /> PDF
+          </Button>
+          <Button variant="secondary" onClick={handleSendEmail} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <FiMail /> {language === 'id' ? 'Kirim Email' : 'Send to Email'}
+          </Button>
         </div>
       </div>
 
-      {/* Date Filter Card */}
-      <Card className="no-print" style={{ padding: '16px 24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            {['This Week', 'Last Month', 'Custom'].map(f => (
-              <button
-                key={f}
-                onClick={() => setDateFilter(f)}
-                style={{
-                  padding: '8px 16px',
-                  borderRadius: '8px',
-                  border: 'none',
-                  backgroundColor: dateFilter === f ? '#e2e8f0' : 'transparent',
-                  color: dateFilter === f ? 'var(--color-motive-dark-blue)' : 'var(--color-dark-gray)',
-                  fontWeight: dateFilter === f ? 600 : 400,
-                  cursor: 'pointer',
-                  fontSize: '14px'
-                }}
-              >
-                {f}
-              </button>
-            ))}
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-dark-gray)', fontSize: '14px' }}>
-            <FiCalendar />
-            <span>{dateString}</span>
-          </div>
-        </div>
+      {/* Filter Tabs */}
+      <div className="no-print" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+        {['This Week', 'Last Month', 'Custom Range'].map(filter => (
+          <button
+            key={filter}
+            onClick={() => setDateFilter(filter)}
+            style={{
+              padding: '10px 24px',
+              borderRadius: '20px',
+              border: 'none',
+              cursor: 'pointer',
+              fontWeight: 600,
+              fontSize: '13px',
+              backgroundColor: dateFilter === filter ? 'var(--color-motive-dark-blue)' : 'var(--surface-input)',
+              color: dateFilter === filter ? 'white' : 'var(--text-secondary)',
+              boxShadow: dateFilter === filter ? 'var(--shadow-level-1)' : 'none',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            {filter === 'This Week' ? (language === 'id' ? 'Minggu Ini' : 'This Week') :
+             filter === 'Last Month' ? (language === 'id' ? 'Bulan Lalu' : 'Last Month') :
+             (language === 'id' ? 'Rentang Khusus' : 'Custom Range')}
+          </button>
+        ))}
 
-        {/* Conditional Custom Datepickers */}
-        {dateFilter === 'Custom' && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '4px', padding: '12px', backgroundColor: 'var(--color-light-gray)', borderRadius: '8px' }}>
-            <label style={{ fontSize: '13px', fontWeight: '600', color: 'var(--color-dark-gray)' }}>Start Date:</label>
-            <input 
-              type="date" 
-              value={customStartDate} 
-              onChange={e => setCustomStartDate(e.target.value)} 
-              style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.15)', fontSize: '13px', outline: 'none' }} 
+        {dateFilter === 'Custom Range' && (
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginLeft: '12px', animation: 'fadeIn 0.2s ease' }}>
+            <FiCalendar style={{ color: 'var(--text-secondary)' }} />
+            <input
+              type="date"
+              value={customStartDate}
+              onChange={e => setCustomStartDate(e.target.value)}
+              style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid var(--border-input)', backgroundColor: 'var(--surface-input)', color: 'var(--text-primary)', fontSize: '13px', outline: 'none' }}
             />
-            <label style={{ fontSize: '13px', fontWeight: '600', color: 'var(--color-dark-gray)' }}>End Date:</label>
-            <input 
-              type="date" 
-              value={customEndDate} 
-              onChange={e => setCustomEndDate(e.target.value)} 
-              style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.15)', fontSize: '13px', outline: 'none' }} 
+            <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>to</span>
+            <input
+              type="date"
+              value={customEndDate}
+              onChange={e => setCustomEndDate(e.target.value)}
+              style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid var(--border-input)', backgroundColor: 'var(--surface-input)', color: 'var(--text-primary)', fontSize: '13px', outline: 'none' }}
             />
           </div>
         )}
-      </Card>
-
-      {/* Export Card */}
-      <div className="no-print" style={{ 
-        backgroundColor: 'var(--color-motive-dark-blue)', 
-        borderRadius: '12px', 
-        padding: '24px 32px', 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center',
-        color: 'white'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ width: '40px', height: '40px', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <FiDownload size={20} />
-          </div>
-          <div>
-            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 600 }}>Export Performance Reports</h3>
-            <p style={{ margin: 0, fontSize: '12px', color: 'rgba(255,255,255,0.7)', marginTop: '4px' }}>Generate a detailed offline copy of your weekly velocity and ERA summaries.</p>
-          </div>
-        </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <Button onClick={handleExportPDF} style={{ backgroundColor: 'white', color: 'var(--color-motive-dark-blue)', fontWeight: 600 }}>
-            <FiDownload style={{ marginRight: '8px', display: 'inline' }}/> Download PDF
-          </Button>
-          <Button onClick={handleSendEmail} style={{ backgroundColor: 'var(--color-motive-light-blue)', color: 'white', fontWeight: 600, border: 'none' }}>
-            <FiMail style={{ marginRight: '8px', display: 'inline' }}/> Send to Email
-          </Button>
-        </div>
       </div>
 
-      {/* Middle Row: Velocity and Focus Split */}
-      <div className="no-print" style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '24px' }}>
+      {/* Grid: Productivity Charts & Details */}
+      <div className="no-print" style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '32px' }}>
         
-        {/* Productivity Velocity Chart Card */}
-        <Card style={{ display: 'flex', flexDirection: 'column', borderTop: '4px solid var(--color-motive-dark-blue)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px' }}>
+        {/* Productivity Velocity Card */}
+        <Card style={{ borderTop: '4px solid var(--color-motive-dark-blue)', display: 'flex', flexDirection: 'column', gap: '24px', minHeight: '340px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
-              <h3 style={{ fontSize: '18px', color: 'var(--color-motive-dark-blue)', margin: '0 0 4px 0' }}>Productivity Velocity</h3>
-              <p style={{ fontSize: '12px', color: 'var(--color-dark-gray)', margin: 0 }}>Output measured in completed deep-work units</p>
+              <h3 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '18px', fontWeight: 600 }}>{t('productivity_velocity')}</h3>
+              <p style={{ margin: '4px 0 0 0', color: 'var(--text-secondary)', fontSize: '12px' }}>
+                {velocityData.totalCompleted} / {velocityData.totalCount} {t('completed_tasks')}
+              </p>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--color-motive-dark-blue)' }}>
+              <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-primary)' }}>
                 {velocityPercentageString}
               </div>
-              <div style={{ fontSize: '10px', color: 'var(--color-motive-light-blue)', fontWeight: 700, letterSpacing: '1px' }}>VS LAST PERIOD</div>
+              <div style={{ fontSize: '10px', color: 'var(--color-motive-light-blue)', fontWeight: 700, letterSpacing: '1px' }}>{t('vs_last')}</div>
             </div>
           </div>
           
           {/* Dual Bar Chart rendering */}
-          <div style={{ flex: 1, display: 'flex', alignItems: 'flex-end', gap: '12px', height: '160px', marginTop: 'auto' }}>
+          <div style={{ flex: 1, display: 'flex', alignItems: 'flex-end', gap: '12px', height: '160px', marginTop: 'auto', position: 'relative' }}>
             {velocityData?.data?.map((day, i) => {
               const totalPct = day.total === 0 ? 0 : (day.total / velocityData.max) * 100;
               const completedPct = day.total === 0 ? 0 : (day.completed / velocityData.max) * 100;
+              const percent = day.total === 0 ? 0 : Math.round((day.completed / day.total) * 100);
+              const formattedLabel = `${day.date.getDate()}-${day.label}`;
               
               return (
-                <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', height: '100%', justifyContent: 'flex-end' }}>
+                <div 
+                  key={i} 
+                  onMouseEnter={() => setHoveredBarIndex(i)}
+                  onMouseLeave={() => setHoveredBarIndex(null)}
+                  style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', height: '100%', justifyContent: 'flex-end', position: 'relative' }}
+                >
+                  {/* Tooltip bubble */}
+                  {hoveredBarIndex === i && (
+                    <div style={{
+                      position: 'absolute',
+                      bottom: `calc(${totalPct}% + 4px)`,
+                      backgroundColor: 'var(--color-motive-dark-blue)',
+                      color: 'white',
+                      padding: '4px 8px',
+                      borderRadius: '4px',
+                      fontSize: '10px',
+                      fontWeight: 700,
+                      whiteSpace: 'nowrap',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                      zIndex: 10,
+                      pointerEvents: 'none',
+                      transform: 'translateX(-50%)',
+                      left: '50%'
+                    }}>
+                      {percent}% {t('completed')}
+                      <div style={{
+                        position: 'absolute',
+                        top: '100%',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        borderWidth: '4px',
+                        borderStyle: 'solid',
+                        borderColor: 'var(--color-motive-dark-blue) transparent transparent transparent'
+                      }} />
+                    </div>
+                  )}
+
                   {/* Cylinder overlay wrappers */}
                   <div style={{ 
                     position: 'relative', 
@@ -510,121 +588,167 @@ Generated by Motive Productivity App - Local-first & Private.
                     height: '120px', 
                     display: 'flex', 
                     alignItems: 'flex-end', 
-                    justifyContent: 'center' 
+                    justifyContent: 'center',
+                    cursor: 'pointer'
                   }}>
                     {/* Total Tasks (Gray Background Bar) */}
                     <div style={{
                       position: 'absolute',
                       width: '14px',
                       height: `${totalPct}%`,
-                      backgroundColor: '#cbd5e1',
+                      backgroundColor: 'var(--border-color)',
                       borderRadius: '4px 4px 0 0',
                       transition: 'height 0.3s ease'
-                    }} title={`Total Tasks: ${day.total}`} />
+                    }} />
                     
-                    {/* Completed Tasks (Navy Foreground Bar) */}
+                    {/* Completed Tasks (Navy Foreground Bar - now #4A5FD9) */}
                     <div style={{
                       position: 'absolute',
                       width: '14px',
                       height: `${completedPct}%`,
-                      backgroundColor: '#1A2254',
+                      backgroundColor: '#4A5FD9',
                       borderRadius: '4px 4px 0 0',
                       transition: 'height 0.3s ease',
                       zIndex: 2
-                    }} title={`Completed Tasks: ${day.completed}`} />
+                    }} />
                   </div>
-                  <span style={{ fontSize: '11px', color: 'var(--color-dark-gray)', fontWeight: 500 }}>{day.label}</span>
+                  <span style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 600, whiteSpace: 'nowrap' }}>{formattedLabel}</span>
                 </div>
               );
             })}
           </div>
           
-          <div style={{ display: 'flex', gap: '16px', marginTop: '16px', fontSize: '11px', color: 'var(--color-dark-gray)', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', gap: '16px', marginTop: '16px', fontSize: '11px', color: 'var(--text-secondary)', justifyContent: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '10px', height: '10px', backgroundColor: '#1A2254', borderRadius: '2px' }}></div>
-              <span>Completed Tasks</span>
+              <div style={{ width: '10px', height: '10px', backgroundColor: '#4A5FD9', borderRadius: '2px' }}></div>
+              <span>{t('completed_tasks')}</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '10px', height: '10px', backgroundColor: '#cbd5e1', borderRadius: '2px' }}></div>
-              <span>Total Scheduled Tasks</span>
+              <div style={{ width: '10px', height: '10px', backgroundColor: 'var(--border-color)', borderRadius: '2px' }}></div>
+              <span>{t('total_tasks')}</span>
             </div>
           </div>
         </Card>
 
         {/* Focus Split */}
         <Card style={{ borderTop: '4px solid var(--color-motive-dark-blue)' }}>
-          <h3 style={{ fontSize: '18px', color: 'var(--color-motive-dark-blue)', margin: '0 0 32px 0' }}>Focus Split</h3>
-          
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <h3 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '18px', fontWeight: 600 }}>{t('focus_split')}</h3>
+          <p style={{ margin: '4px 0 24px 0', color: 'var(--text-secondary)', fontSize: '12px' }}>
+            {t('focus_split_desc')}
+          </p>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {focusSplitData.length === 0 ? (
-              <p style={{ color: 'var(--color-dark-gray)', fontSize: '14px', textAlign: 'center' }}>No tasks found in this date range.</p>
+              <div style={{ color: 'var(--text-secondary)', fontSize: '14px', textAlign: 'center', padding: '32px' }}>
+                {t('no_tasks_range')}
+              </div>
             ) : (
-              focusSplitData.map((item, i) => (
-                <div key={i}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '12px', fontWeight: 600 }}>
-                    <span style={{ color: 'var(--color-motive-dark-blue)' }}>{item.name}</span>
-                    <span style={{ color: 'var(--color-dark-gray)' }}>{item.percentage}% ({item.count} tasks)</span>
+              focusSplitData.map((item, idx) => (
+                <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: 600 }}>
+                    <span style={{ color: 'var(--text-primary)' }}>{item.name}</span>
+                    <span style={{ color: 'var(--color-motive-light-blue)' }}>{item.percentage}%</span>
                   </div>
-                  <div style={{ height: '8px', backgroundColor: '#f1f5f9', borderRadius: '4px', overflow: 'hidden' }}>
-                    <div style={{ 
-                      height: '100%', 
-                      width: `${item.percentage}%`, 
-                      backgroundColor: 'var(--color-motive-light-blue)',
-                      borderRadius: '4px'
-                    }}></div>
+                  <div style={{ width: '100%', height: '8px', backgroundColor: 'var(--border-color)', borderRadius: '4px', overflow: 'hidden' }}>
+                    <div style={{ width: `${item.percentage}%`, height: '100%', backgroundColor: 'var(--color-motive-light-blue)', borderRadius: '4px' }}></div>
                   </div>
                 </div>
               ))
             )}
           </div>
-          <div style={{ marginTop: '32px', textAlign: 'center', fontSize: '10px', color: 'var(--color-dark-gray)' }}>
-            Categorized focus ratios based on all scheduled range tasks
-          </div>
         </Card>
       </div>
 
-      {/* ERA Summaries */}
-      <Card className="no-print" style={{ borderTop: '4px solid var(--color-motive-dark-blue)' }}>
+      {/* ERA Reflection & Analysis Summaries */}
+      <Card className="no-print" style={{ borderTop: '4px solid var(--color-motive-light-blue)', padding: '32px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
           <div>
-            <h3 style={{ fontSize: '18px', color: 'var(--color-motive-dark-blue)', margin: '0 0 4px 0' }}>ERA Summaries</h3>
-            <p style={{ fontSize: '12px', color: 'var(--color-dark-gray)', margin: 0 }}>Executive Reflection & Analysis (AI Generated)</p>
+            <h3 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '20px', fontWeight: 600 }}>{t('era_summaries')}</h3>
+            <p style={{ margin: '4px 0 0 0', color: 'var(--text-secondary)', fontSize: '13px' }}>
+              {t('era_desc')}
+            </p>
           </div>
-          <Button onClick={generateNewERA} disabled={aiLoading} style={{ backgroundColor: '#eef2ff', color: 'var(--color-motive-dark-blue)', fontWeight: 600, border: 'none' }}>
-            {aiLoading ? 'GENERATING...' : 'GENERATE REPORT'}
+          <Button 
+            onClick={handleGenerateReport} 
+            disabled={aiLoading}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px' }}
+          >
+            {aiLoading ? (
+              <>
+                <FiLoader className="spin-loader" /> {t('generating')}
+              </>
+            ) : (
+              <>
+                ⚡ {t('generate_report')}
+              </>
+            )}
+            <style dangerouslySetInnerHTML={{__html: `
+              @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+              }
+              .spin-loader {
+                animation: spin 1s linear infinite;
+              }
+            `}} />
           </Button>
         </div>
 
-        {/* Display the most recent summary as the "Weekly Comprehensive ERA" */}
+        {/* Display the most recent summary as the "LATEST COMPREHENSIVE ERA SUMMARY" */}
         {summaries && summaries.length > 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
             {/* Featured Latest Summary */}
-            <div style={{ paddingBottom: '32px', borderBottom: '1px solid #f1f5f9' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-motive-dark-blue)', fontWeight: 600, fontSize: '12px', marginBottom: '16px', letterSpacing: '0.5px' }}>
-                <FiDownload /> WEEKLY COMPREHENSIVE ERA ({summaries[0].dateRangeStr || 'Recent'})
+            <div style={{ paddingBottom: '32px', borderBottom: summaries.length > 1 ? '1px solid var(--border-color)' : 'none' }}>
+              
+              {/* White wording tag styled inside Motive Dark Blue solid badge */}
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                color: 'white',
+                backgroundColor: 'var(--color-motive-dark-blue)',
+                fontWeight: 700,
+                fontSize: '11px',
+                padding: '6px 16px',
+                borderRadius: '20px',
+                marginBottom: '20px',
+                letterSpacing: '0.5px',
+                textTransform: 'uppercase'
+              }}>
+                <FiDownload style={{ marginRight: '4px' }} />
+                {language === 'id' 
+                  ? `IKHTISAR SIKLUS ERA TERBARU — ${new Date(summaries[0].date).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}`
+                  : `LATEST COMPREHENSIVE ERA SUMMARY — ${new Date(summaries[0].date).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}`}
               </div>
+
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '24px' }}>
                 <div>
-                  <h4 style={{ fontSize: '10px', color: 'var(--color-motive-light-blue)', fontWeight: 700, letterSpacing: '1px', marginBottom: '8px' }}>ACCOMPLISHED (EXPERIENCE)</h4>
-                  <p style={{ fontSize: '13px', color: 'var(--color-dark-gray)', lineHeight: 1.6, margin: 0 }}>{summaries[0].experience}</p>
+                  <h4 style={{ fontSize: '10px', color: 'var(--color-motive-light-blue)', fontWeight: 700, letterSpacing: '1px', marginBottom: '12px' }}>
+                    {language === 'id' ? 'PENCAPAIAN (EXPERIENCE)' : 'ACCOMPLISHED (EXPERIENCE)'}
+                  </h4>
+                  {formatERAPoints(summaries[0].experience)}
                 </div>
-                <div style={{ borderLeft: '1px solid #f1f5f9', paddingLeft: '24px' }}>
-                  <h4 style={{ fontSize: '10px', color: '#dc2626', fontWeight: 700, letterSpacing: '1px', marginBottom: '8px' }}>CHALLENGES (REFLECTION)</h4>
-                  <p style={{ fontSize: '13px', color: 'var(--color-dark-gray)', lineHeight: 1.6, margin: 0 }}>{summaries[0].reflection}</p>
+                <div style={{ borderLeft: '1px solid var(--border-color)', paddingLeft: '24px' }}>
+                  <h4 style={{ fontSize: '10px', color: '#dc2626', fontWeight: 700, letterSpacing: '1px', marginBottom: '12px' }}>
+                    {language === 'id' ? 'TANTANGAN (REFLECTION)' : 'CHALLENGES (REFLECTION)'}
+                  </h4>
+                  {formatERAPoints(summaries[0].reflection)}
                 </div>
-                <div style={{ borderLeft: '1px solid #f1f5f9', paddingLeft: '24px' }}>
-                  <h4 style={{ fontSize: '10px', color: 'var(--color-motive-dark-blue)', fontWeight: 700, letterSpacing: '1px', marginBottom: '8px' }}>ACTION PLAN (ACTION)</h4>
-                  <p style={{ fontSize: '13px', color: 'var(--color-dark-gray)', lineHeight: 1.6, margin: 0 }}>{summaries[0].action}</p>
+                <div style={{ borderLeft: '1px solid var(--border-color)', paddingLeft: '24px' }}>
+                  <h4 style={{ fontSize: '10px', color: 'var(--color-motive-light-blue)', fontWeight: 700, letterSpacing: '1px', marginBottom: '12px' }}>
+                    {language === 'id' ? 'RENCANA KERJA (ACTION)' : 'ACTION PLAN (ACTION)'}
+                  </h4>
+                  {formatERAPoints(summaries[0].action)}
                 </div>
               </div>
               
               {/* Render Daily Highlights for the latest featured summary if they exist */}
               {summaries[0].dailyHighlights && summaries[0].dailyHighlights.length > 0 && (
-                <div style={{ marginTop: '24px', backgroundColor: 'var(--color-light-gray)', padding: '20px', borderRadius: '8px', borderLeft: '4px solid var(--color-motive-light-blue)' }}>
-                  <h4 style={{ fontSize: '11px', color: 'var(--color-motive-dark-blue)', fontWeight: 700, letterSpacing: '1px', margin: '0 0 12px 0' }}>DAILY REFLECTION OVERVIEW</h4>
+                <div style={{ marginTop: '24px', backgroundColor: 'var(--surface-input)', padding: '20px', borderRadius: '8px', borderLeft: '4px solid var(--color-motive-light-blue)' }}>
+                  <h4 style={{ fontSize: '11px', color: 'var(--color-motive-dark-blue)', fontWeight: 700, letterSpacing: '1px', margin: '0 0 12px 0' }}>{t('daily_overview')}</h4>
                   <ul style={{ margin: 0, paddingLeft: '16px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                     {summaries[0].dailyHighlights.map((hl, hlIdx) => (
-                      <li key={hlIdx} style={{ fontSize: '12.5px', color: 'var(--color-dark-gray)', lineHeight: '1.4' }}>
+                      <li key={hlIdx} style={{ fontSize: '12.5px', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
                         <strong>{hl.date}:</strong> {hl.highlight}
                       </li>
                     ))}
@@ -633,75 +757,225 @@ Generated by Motive Productivity App - Local-first & Private.
               )}
             </div>
 
-            {/* List of older summaries (un-cropped & displaying date creation and highlights) */}
+            {/* View Historical Periodical Reports Button */}
             {summaries.length > 1 && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                <h4 style={{ fontSize: '14px', fontWeight: '700', color: 'var(--color-motive-dark-blue)', margin: '0 0 8px 0' }}>Historical Periodical Reports</h4>
-                
-                {summaries.slice(1, 10).map((summary, idx) => {
-                  const d = new Date(summary.date);
-                  return (
-                    <div key={summary.id} style={{ 
-                      display: 'flex', 
-                      flexDirection: 'column', 
-                      gap: '16px', 
-                      paddingBottom: '24px', 
-                      borderBottom: idx < (summaries.length - 2) ? '1px solid #f1f5f9' : 'none' 
-                    }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                        <div>
-                          <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-motive-dark-blue)' }}>
-                            {d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric'})}
-                          </div>
-                          <div style={{ fontSize: '12px', color: 'var(--color-dark-gray)', marginTop: '2px' }}>
-                            Generated on: {d.toLocaleDateString('en-US', { weekday: 'long', hour: '2-digit', minute: '2-digit' })}
-                          </div>
-                        </div>
-                        <span style={{ fontSize: '10px', padding: '2px 8px', backgroundColor: '#eef2ff', color: 'var(--color-motive-light-blue)', fontWeight: 600, borderRadius: '4px' }}>
-                          SAVED ERA ({summary.dateRangeStr || 'Custom Range'})
-                        </span>
-                      </div>
-
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px', backgroundColor: '#fafafa', padding: '20px', borderRadius: '12px', border: '1px solid #f1f5f9' }}>
-                        <div>
-                          <div style={{ fontSize: '10px', color: 'var(--color-motive-light-blue)', fontWeight: 700, letterSpacing: '0.5px', marginBottom: '6px' }}>ACCOMPLISHED</div>
-                          <div style={{ fontSize: '13px', color: 'var(--color-dark-gray)', lineHeight: '1.5' }}>{summary.experience}</div>
-                        </div>
-                        <div style={{ borderLeft: '1px solid #eef2ff', paddingLeft: '16px' }}>
-                          <div style={{ fontSize: '10px', color: '#dc2626', fontWeight: 700, letterSpacing: '0.5px', marginBottom: '6px' }}>CHALLENGES</div>
-                          <div style={{ fontSize: '13px', color: 'var(--color-dark-gray)', lineHeight: '1.5' }}>{summary.reflection}</div>
-                        </div>
-                        <div style={{ borderLeft: '1px solid #eef2ff', paddingLeft: '16px' }}>
-                          <div style={{ fontSize: '10px', color: 'var(--color-motive-dark-blue)', fontWeight: 700, letterSpacing: '0.5px', marginBottom: '6px' }}>ACTION PLAN</div>
-                          <div style={{ fontSize: '13px', color: 'var(--color-dark-gray)', lineHeight: '1.5' }}>{summary.action}</div>
-                        </div>
-                      </div>
-
-                      {/* Render Highlights for older summaries */}
-                      {summary.dailyHighlights && summary.dailyHighlights.length > 0 && (
-                        <div style={{ paddingLeft: '12px', borderLeft: '3px solid var(--color-motive-light-blue)', marginTop: '4px' }}>
-                          <div style={{ fontSize: '11px', fontWeight: '700', color: 'var(--color-motive-dark-blue)', marginBottom: '8px' }}>DAILY REFLECTION OVERVIEW:</div>
-                          <ul style={{ margin: 0, paddingLeft: '16px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                            {summary.dailyHighlights.map((hl, hlIdx) => (
-                              <li key={hlIdx} style={{ fontSize: '12px', color: 'var(--color-dark-gray)', lineHeight: '1.4' }}>
-                                <strong>{hl.date}:</strong> {hl.highlight}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '8px' }}>
+                <Button 
+                  variant="secondary" 
+                  onClick={() => {
+                    setHistoryPage(1);
+                    setSelectedHistorySummary(null);
+                    setIsHistoryModalOpen(true);
+                  }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px' }}
+                >
+                  📁 {language === 'id' ? 'Lihat Riwayat Laporan Periodik' : 'View Historical Periodical Reports'}
+                </Button>
               </div>
             )}
           </div>
         ) : (
-          <div style={{ padding: '48px 0', textAlign: 'center', color: 'var(--color-dark-gray)' }}>
-            No ERA summaries generated yet. Click Generate Report to analyze your selected date range.
+          <div style={{ textAlign: 'center', padding: '48px', color: 'var(--text-secondary)' }}>
+            {t('no_era')}
           </div>
         )}
       </Card>
+
+      {/* Historical Periodical Reports Modal with 5-row pagination */}
+      {isHistoryModalOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 10000,
+          padding: '24px',
+          backdropFilter: 'blur(4px)'
+        }}>
+          <div style={{
+            backgroundColor: 'var(--surface-card)',
+            borderRadius: '16px',
+            width: '900px',
+            maxWidth: '100%',
+            maxHeight: '90vh',
+            overflowY: 'auto',
+            padding: '32px',
+            boxShadow: 'var(--shadow-level-2)',
+            borderTop: '4px solid var(--color-motive-dark-blue)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '24px'
+          }}>
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h3 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '20px', fontWeight: 700 }}>
+                  {language === 'id' ? 'Riwayat Laporan Siklus ERA' : 'Historical ERA Cycle Reports'}
+                </h3>
+                <p style={{ margin: '4px 0 0 0', color: 'var(--text-secondary)', fontSize: '13px' }}>
+                  {language === 'id' ? 'Semua laporan periodik yang telah dibuat sebelumnya.' : 'Browse and review all past periodically generated reports.'}
+                </p>
+              </div>
+              <button
+                onClick={() => setIsHistoryModalOpen(false)}
+                style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '20px' }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Detailed single report expand view */}
+            {selectedHistorySummary ? (
+              <div style={{
+                backgroundColor: 'var(--surface-input)',
+                borderRadius: '12px',
+                padding: '24px',
+                borderLeft: '4px solid var(--color-motive-light-blue)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '20px'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
+                  <span style={{ fontWeight: 700, fontSize: '14px', color: 'var(--color-motive-dark-blue)' }}>
+                    {language === 'id' ? 'PERIODE LAPORAN:' : 'REPORT PERIOD:'} {selectedHistorySummary.dateRangeStr || 'Historical'}
+                  </span>
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                    <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                      {new Date(selectedHistorySummary.date).toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}
+                    </span>
+                    <Button variant="secondary" style={{ padding: '4px 12px', fontSize: '11px' }} onClick={() => setSelectedHistorySummary(null)}>
+                      ← {language === 'id' ? 'Kembali ke Daftar' : 'Back to List'}
+                    </Button>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '24px' }}>
+                  <div>
+                    <h4 style={{ fontSize: '11px', color: 'var(--color-motive-light-blue)', fontWeight: 700, letterSpacing: '1px', marginBottom: '12px' }}>
+                      {language === 'id' ? 'PENCAPAIAN (EXPERIENCE)' : 'ACCOMPLISHED (EXPERIENCE)'}
+                    </h4>
+                    {formatERAPoints(selectedHistorySummary.experience)}
+                  </div>
+                  <div style={{ borderLeft: '1px solid var(--border-color)', paddingLeft: '24px' }}>
+                    <h4 style={{ fontSize: '11px', color: '#dc2626', fontWeight: 700, letterSpacing: '1px', marginBottom: '12px' }}>
+                      {language === 'id' ? 'TANTANGAN (REFLECTION)' : 'CHALLENGES (REFLECTION)'}
+                    </h4>
+                    {formatERAPoints(selectedHistorySummary.reflection)}
+                  </div>
+                  <div style={{ borderLeft: '1px solid var(--border-color)', paddingLeft: '24px' }}>
+                    <h4 style={{ fontSize: '11px', color: 'var(--color-motive-light-blue)', fontWeight: 700, letterSpacing: '1px', marginBottom: '12px' }}>
+                      {language === 'id' ? 'RENCANA KERJA (ACTION)' : 'ACTION PLAN (ACTION)'}
+                    </h4>
+                    {formatERAPoints(selectedHistorySummary.action)}
+                  </div>
+                </div>
+
+                {selectedHistorySummary.dailyHighlights && selectedHistorySummary.dailyHighlights.length > 0 && (
+                  <div style={{ marginTop: '16px', backgroundColor: 'var(--surface-card)', padding: '16px', borderRadius: '8px', borderLeft: '4px solid var(--color-motive-light-blue)' }}>
+                    <h5 style={{ fontSize: '11px', color: 'var(--color-motive-dark-blue)', fontWeight: 700, letterSpacing: '1px', margin: '0 0 8px 0' }}>
+                      {language === 'id' ? 'IKHTISAR REFLEKSI HARIAN' : 'DAILY REFLECTION OVERVIEW'}
+                    </h5>
+                    <ul style={{ margin: 0, paddingLeft: '16px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      {selectedHistorySummary.dailyHighlights.map((hl, hlIdx) => (
+                        <li key={hlIdx} style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+                          <strong>{hl.date}:</strong> {hl.highlight}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <>
+                {/* Historical summaries list before the recent one */}
+                {historicalSummaries.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '48px', color: 'var(--text-secondary)' }}>
+                    {language === 'id' ? 'Tidak ada laporan riwayat sebelum laporan terbaru ini.' : 'No older reports found in history.'}
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
+                      <thead>
+                        <tr style={{ borderBottom: '2px solid var(--border-color)', color: 'var(--text-primary)', fontWeight: 600 }}>
+                          <th style={{ padding: '12px' }}>{language === 'id' ? 'Tanggal Pembuatan' : 'Date Generated'}</th>
+                          <th style={{ padding: '12px' }}>{language === 'id' ? 'Periode Laporan' : 'Report Period'}</th>
+                          <th style={{ padding: '12px', textAlign: 'right' }}>{language === 'id' ? 'Aksi' : 'Action'}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {historicalSummaries.slice((historyPage - 1) * 5, historyPage * 5).map((summary) => {
+                          const genDate = new Date(summary.date);
+                          return (
+                            <tr key={summary.id} style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}>
+                              <td style={{ padding: '14px 12px', fontWeight: 600 }}>
+                                {genDate.toLocaleString(language === 'id' ? 'id-ID' : 'en-US')}
+                              </td>
+                              <td style={{ padding: '14px 12px' }}>
+                                {summary.dateRangeStr || 'Custom Period'}
+                              </td>
+                              <td style={{ padding: '14px 12px', textAlign: 'right' }}>
+                                <Button 
+                                  variant="secondary" 
+                                  style={{ padding: '6px 12px', fontSize: '11px' }} 
+                                  onClick={() => setSelectedHistorySummary(summary)}
+                                >
+                                  {language === 'id' ? 'Lihat Laporan' : 'View Report'}
+                                </Button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+
+                    {/* Pagination Controls */}
+                    {historicalSummaries.length > 5 && (
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px' }}>
+                        <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                          {language === 'id' 
+                            ? `Halaman ${historyPage} dari ${Math.ceil(historicalSummaries.length / 5)}`
+                            : `Page ${historyPage} of ${Math.ceil(historicalSummaries.length / 5)}`}
+                        </span>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <Button
+                            variant="secondary"
+                            disabled={historyPage === 1}
+                            onClick={() => setHistoryPage(p => Math.max(p - 1, 1))}
+                            style={{ padding: '6px 16px', fontSize: '12px' }}
+                          >
+                            {language === 'id' ? 'Sebelumnya' : 'Previous'}
+                          </Button>
+                          <Button
+                            variant="secondary"
+                            disabled={historyPage >= Math.ceil(historicalSummaries.length / 5)}
+                            onClick={() => setHistoryPage(p => Math.min(p + 1, Math.ceil(historicalSummaries.length / 5)))}
+                            style={{ padding: '6px 16px', fontSize: '12px' }}
+                          >
+                            {language === 'id' ? 'Berikutnya' : 'Next'}
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
+              <Button style={{ padding: '12px 28px' }} onClick={() => setIsHistoryModalOpen(false)}>
+                {t('close')}
+              </Button>
+            </div>
+
+          </div>
+        </div>
+      )}
+      
     </div>
   );
 }

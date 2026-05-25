@@ -1,17 +1,62 @@
 :root {
+  /* Brand colors — invariant */
   --color-motive-dark-blue: #2E3A8C;
   --color-motive-light-blue: #4A5FD9;
   --color-motive-navy: #1A2254;
+
+  /* Light mode semantic tokens */
+  --bg-color: #F5F7FA;
+  --surface-bg: #F5F7FA;
+  --surface-card: #FFFFFF;
+  --surface-nav: #FFFFFF;
+  --surface-input: #FFFFFF;
+  --text-primary: #1A1A1A;
+  --text-secondary: #4A4A4A;
+  --text-muted: #6B7280;
+  --border-color: rgba(0, 0, 0, 0.10);
+  --border-input: #d1d5db;
+  --divider-color: rgba(0, 0, 0, 0.06);
+  --chip-bg: rgba(46, 58, 140, 0.10);
+  --chip-color: #2E3A8C;
+  --logo-color: #2E3A8C;
+
+  /* Legacy aliases (kept for backward-compat) */
   --color-light-gray: #F5F7FA;
   --color-white: #FFFFFF;
   --color-black: #1A1A1A;
   --color-dark-gray: #4A4A4A;
-  
-  --bg-color: var(--color-light-gray);
-  --text-color: var(--color-black);
-  
-  --shadow-level-1: 0px 2px 8px rgba(0,0,0,0.08);
-  --shadow-level-2: 0px 8px 24px rgba(0,0,0,0.12);
+  --text-color: #1A1A1A;
+
+  --shadow-level-1: 0px 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-level-2: 0px 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* ── Dark Mode ── */
+[data-theme="dark"] {
+  --bg-color: #0F1117;
+  --surface-bg: #0F1117;
+  --surface-card: #1d2130;
+  --surface-nav: #161925;
+  --surface-input: #262b40;
+  --text-primary: #FFFFFF;
+  --text-secondary: #A0A9C0;
+  --text-muted: #6B7591;
+  --border-color: rgba(255, 255, 255, 0.07);
+  --border-input: transparent;
+  --divider-color: rgba(255, 255, 255, 0.06);
+  --chip-bg: rgba(74, 95, 217, 0.20);
+  --chip-color: #7B93F0;
+  --logo-color: #F0EFFF;
+
+  /* Legacy aliases */
+  --color-light-gray: #1d2130;
+  --color-white: #1d2130;
+  --color-black: #FFFFFF;
+  --color-dark-gray: #A0A9C0;
+  --text-color: #FFFFFF;
+
+  --shadow-level-1: 0px 2px 8px rgba(0, 0, 0, 0.30);
+  --shadow-level-2: 0px 8px 24px rgba(0, 0, 0, 0.45);
 }
 
 html, body {

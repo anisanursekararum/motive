@@ -15,7 +15,7 @@
 
 .btnPrimary {
   background-color: var(--color-motive-dark-blue);
-  color: var(--color-white);
+  color: #FFFFFF;
 }
 
 .btnPrimary:hover {
@@ -28,6 +28,11 @@
   border: 1px solid var(--color-motive-dark-blue);
 }
 
+[data-theme="dark"] .btnSecondary {
+  color: var(--color-motive-light-blue);
+  border-color: var(--color-motive-light-blue);
+}
+
 .btnSecondary:hover {
   border-color: var(--color-motive-light-blue);
   color: var(--color-motive-light-blue);
@@ -35,7 +40,7 @@
 }
 
 .card {
-  background-color: var(--color-white);
+  background-color: var(--surface-card);
   border-radius: 12px;
   box-shadow: var(--shadow-level-1);
   padding: 24px;
@@ -43,15 +48,19 @@
 
 .input, .textarea {
   border-radius: 8px;
-  border: 1px solid #d1d5db; /* Light gray border */
+  border: 1px solid var(--border-input);
   padding: 10px 12px;
   font-family: inherit;
   font-size: 14px;
   width: 100%;
   transition: all 0.2s ease;
   outline: none;
-  background-color: var(--color-white);
-  color: var(--text-color);
+  background-color: var(--surface-input);
+  color: var(--text-primary);
+}
+
+.input::placeholder, .textarea::placeholder {
+  color: var(--text-muted);
 }
 
 .input:focus, .textarea:focus {
@@ -69,8 +78,8 @@
   align-items: center;
   height: 20px;
   border-radius: 4px;
-  background-color: rgba(46, 58, 140, 0.1);
-  color: var(--color-motive-dark-blue);
+  background-color: var(--chip-bg);
+  color: var(--chip-color);
   font-weight: 600;
   font-size: 11px;
   padding: 0 8px;
