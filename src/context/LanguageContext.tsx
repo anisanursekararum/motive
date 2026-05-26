@@ -27,7 +27,7 @@ export const translations: TranslationsType = {
     cancel: "Cancel",
     delete: "Delete",
     loading: "Loading...",
-    
+
     // Task Manager
     new_objective: "New Objective",
     task_title: "Task Title",
@@ -114,7 +114,7 @@ export const translations: TranslationsType = {
     onboarding_desc: "Enable the interactive step-by-step tour of the Motive workspace.",
     language: "Language",
     language_desc: "Choose your preferred language.",
-    
+
     // Onboarding Tour
     tour_welcome_title: "Welcome to Motive!",
     tour_welcome_desc: "Let's take a quick, 5-step interactive tour to learn how to align your productivity with self-reflection.",
@@ -151,7 +151,7 @@ export const translations: TranslationsType = {
     loading: "Memuat...",
 
     // Task Manager
-    new_objective: "Tujuan Baru",
+    new_objective: "Tugas Baru",
     task_title: "Judul Tugas",
     task_desc: "Deskripsi (opsional)",
     category: "Kategori",
@@ -172,14 +172,14 @@ export const translations: TranslationsType = {
     category_placeholder: "Nama Kategori",
     daily_velocity: "Kecepatan Harian",
     era_ai: "ERA Siklus AI",
-    insights_ready: "Wawasan Siap",
-    extract_insights: "Ekstrak Wawasan AI",
-    insights_modal_title: "Wawasan Siklus ERA",
+    insights_ready: "Rangkuman Siap",
+    extract_insights: "Ekstrak Rangkuman AI",
+    insights_modal_title: "Rangkuman Siklus ERA",
     experience_title: "EXPERIENCE (PENCAPAIAN)",
     reflection_title: "REFLECTION (TANTANGAN)",
     action_title: "ACTION PLAN (RENCANA KERJA)",
     close: "Tutup",
-    generating_insights: "Menganalisis tugas dan jurnal untuk menghasilkan wawasan profesional...",
+    generating_insights: "Menganalisis tugas dan jurnal untuk menghasilkan rangkuman profesional...",
 
     // Journaling Page
     journal_title: "Jurnal",
@@ -265,7 +265,7 @@ interface LanguageContextValue {
 
 const LanguageContext = createContext<LanguageContextValue>({
   language: 'en',
-  setLanguage: () => {},
+  setLanguage: () => { },
   t: (key: string) => key,
 });
 

@@ -35,7 +35,7 @@ export function ReportsDashboard() {
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [historyPage, setHistoryPage] = useState(1);
   const [selectedHistorySummary, setSelectedHistorySummary] = useState<Summary | null>(null);
-  
+
   // Custom date picker states
   const defaultStart = useMemo(() => {
     const d = new Date();
@@ -51,7 +51,7 @@ export function ReportsDashboard() {
   const dateRange = useMemo((): { start: Date; end: Date } => {
     const end = new Date();
     const start = new Date();
-    
+
     if (dateFilter === 'This Week') {
       start.setDate(end.getDate() - 6);
     } else if (dateFilter === 'Last Month') {
@@ -59,17 +59,17 @@ export function ReportsDashboard() {
     } else {
       const s = new Date(customStartDate);
       const e = new Date(customEndDate);
-      s.setHours(0,0,0,0);
-      e.setHours(23,59,59,999);
+      s.setHours(0, 0, 0, 0);
+      e.setHours(23, 59, 59, 999);
       return { start: s, end: e };
     }
-    
-    start.setHours(0,0,0,0);
-    end.setHours(23,59,59,999);
+
+    start.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999);
     return { start, end };
   }, [dateFilter, customStartDate, customEndDate]);
 
-  const dateString = `${dateRange.start.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', { month: 'short', day: 'numeric', year: 'numeric'})} - ${dateRange.end.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', { month: 'short', day: 'numeric', year: 'numeric'})}`;
+  const dateString = `${dateRange.start.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', { month: 'short', day: 'numeric', year: 'numeric' })} - ${dateRange.end.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
 
   // Fetch data
   const tasks = useLiveQuery(async (): Promise<Task[]> => {
@@ -81,7 +81,8 @@ export function ReportsDashboard() {
   }, []);
 
   const summaries = useLiveQuery(async (): Promise<Summary[]> => {
-    return await db.summaries.reverse().toArray();
+    const list = await db.summaries.toArray();
+    return list.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, []);
 
   // Filter tasks and notes by dateRange
@@ -104,7 +105,7 @@ export function ReportsDashboard() {
   // --- Calculate Productivity Velocity ---
   const velocityData = useMemo((): { data: VelocityDay[]; max: number; totalCompleted: number; totalCount: number } => {
     if (!filteredTasks) return { data: [], max: 1, totalCompleted: 0, totalCount: 0 };
-    
+
     const days: VelocityDay[] = [];
     const current = new Date(dateRange.start);
     while (current <= dateRange.end) {
@@ -116,16 +117,16 @@ export function ReportsDashboard() {
       });
       current.setDate(current.getDate() + 1);
     }
-    
+
     let displayDays = days;
     if (days.length > 14) {
-       displayDays = days.slice(-14);
+      displayDays = days.slice(-14);
     }
 
     filteredTasks.forEach(task => {
       const taskDate = new Date(task.deadline || task.createdAt);
-      const dayMatch = displayDays.find(d => 
-        d.date.getDate() === taskDate.getDate() && 
+      const dayMatch = displayDays.find(d =>
+        d.date.getDate() === taskDate.getDate() &&
         d.date.getMonth() === taskDate.getMonth() &&
         d.date.getFullYear() === taskDate.getFullYear()
       );
@@ -136,12 +137,12 @@ export function ReportsDashboard() {
         }
       }
     });
-    
+
     const maxTotal = Math.max(...displayDays.map(d => d.total), 1);
-    
-    return { 
-      data: displayDays, 
-      max: maxTotal, 
+
+    return {
+      data: displayDays,
+      max: maxTotal,
       totalCompleted: filteredTasks.filter(t => t.status === 'completed').length,
       totalCount: filteredTasks.length
     };
@@ -150,24 +151,24 @@ export function ReportsDashboard() {
   // --- Correct Productivity Velocity Percentage VS Previous Period ---
   const velocityPercentageString = useMemo((): string => {
     if (!tasks || !dateRange) return '0%';
-    
+
     const duration = dateRange.end.getTime() - dateRange.start.getTime();
     const prevStart = new Date(dateRange.start.getTime() - duration - 1);
     const prevEnd = new Date(dateRange.start.getTime() - 1);
-    
+
     const currentCompleted = filteredTasks.filter(t => t.status === 'completed').length;
-    
+
     const prevCompleted = tasks.filter(t => {
       if (t.status !== 'completed' || !t.completedAt) return false;
       const compDate = new Date(t.completedAt);
       return compDate >= prevStart && compDate <= prevEnd;
     }).length;
-    
+
     if (prevCompleted === 0) {
       if (currentCompleted > 0) return `+${currentCompleted * 100}%`;
       return '0%';
     }
-    
+
     const change = ((currentCompleted - prevCompleted) / prevCompleted) * 100;
     const rounded = Math.round(change);
     return rounded >= 0 ? `+${rounded}%` : `${rounded}%`;
@@ -176,13 +177,13 @@ export function ReportsDashboard() {
   // --- Calculate Focus Split (All categories with tasks in range) ---
   const focusSplitData = useMemo((): FocusSplitItem[] => {
     if (!filteredTasks || filteredTasks.length === 0) return [];
-    
+
     const categories: Record<string, number> = {};
     filteredTasks.forEach(t => {
       const cat = t.category || 'Other';
       categories[cat] = (categories[cat] || 0) + 1;
     });
-    
+
     return Object.entries(categories)
       .map(([name, count]) => ({
         name,
@@ -198,10 +199,10 @@ export function ReportsDashboard() {
 
   const handleSendEmail = async () => {
     const savedRecipient = localStorage.getItem('settings_recipientEmail') || user?.email || 'reflection@motive.app';
-    
+
     // Construct email content
     const latestSummary = summaries && summaries.length > 0 ? summaries[0] : null;
-    
+
     let eraText = "";
     if (latestSummary) {
       eraText = `
@@ -237,7 +238,7 @@ ${eraText}
 
 ==================================
 Keep up the positive momentum and self-reflection!
-Sent directly from Motive App on behalf of anisanursekararum@gmail.com.
+Sent directly from Motive App on behalf of motiveappmomentumandreflective@gmail.com.
     `.trim();
 
     setEmailSending(true);
@@ -254,8 +255,10 @@ Sent directly from Motive App on behalf of anisanursekararum@gmail.com.
       const data = await res.json();
       if (data.success) {
         alert(language === 'id'
-          ? `Laporan berhasil dikirim langsung ke ${savedRecipient} dari anisanursekararum@gmail.com!`
-          : `Report successfully sent directly to ${savedRecipient} from anisanursekararum@gmail.com!`);
+          ? `Laporan berhasil dikirim langsung ke ${savedRecipient} dari motiveappmomentumandreflective@gmail.com
+!`
+          : `Report successfully sent directly to ${savedRecipient} from motiveappmomentumandreflective@gmail.com
+!`);
       } else {
         throw new Error(data.error);
       }
@@ -273,18 +276,18 @@ Sent directly from Motive App on behalf of anisanursekararum@gmail.com.
       const response = await fetch('/api/summarize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          tasks: filteredTasks, 
+        body: JSON.stringify({
+          tasks: filteredTasks,
           notes: filteredNotes,
           dateRange: dateString,
           language: language
         })
       });
-      
+
       if (!response.ok) throw new Error("Failed to call API");
-      
+
       const data = await response.json();
-      
+
       const newSummary: Summary = {
         id: crypto.randomUUID(),
         date: new Date().toISOString(),
@@ -295,7 +298,7 @@ Sent directly from Motive App on behalf of anisanursekararum@gmail.com.
         action: data.action,
         dailyHighlights: data.dailyHighlights || []
       };
-      
+
       await db.summaries.put(newSummary);
     } catch (err) {
       console.error(err);
@@ -320,7 +323,7 @@ Sent directly from Motive App on behalf of anisanursekararum@gmail.com.
     return paragraphs.map((para, pIdx) => {
       const lines = para.split('\n').filter(Boolean);
       const isList = lines.some(line => /^\s*[-*•\d+.]/.test(line));
-      
+
       if (isList) {
         return (
           <ul key={pIdx} style={{ margin: '8px 0 16px 20px', paddingLeft: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -335,7 +338,7 @@ Sent directly from Motive App on behalf of anisanursekararum@gmail.com.
           </ul>
         );
       }
-      
+
       return (
         <p key={pIdx} style={{ fontSize: '13px', lineHeight: 1.6, color: 'var(--text-secondary)', marginBottom: '16px', textAlign: 'justify' }}>
           {para}
@@ -351,9 +354,10 @@ Sent directly from Motive App on behalf of anisanursekararum@gmail.com.
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', paddingBottom: '48px' }}>
-      
+
       {/* CSS print override injector */}
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         @media print {
           body * {
             visibility: hidden;
@@ -490,8 +494,8 @@ Sent directly from Motive App on behalf of anisanursekararum@gmail.com.
             }}
           >
             {filter === 'This Week' ? (language === 'id' ? 'Minggu Ini' : 'This Week') :
-             filter === 'Last Month' ? (language === 'id' ? 'Bulan Lalu' : 'Last Month') :
-             (language === 'id' ? 'Rentang Khusus' : 'Custom Range')}
+              filter === 'Last Month' ? (language === 'id' ? 'Bulan Lalu' : 'Last Month') :
+                (language === 'id' ? 'Rentang Khusus' : 'Custom Range')}
           </button>
         ))}
 
@@ -517,7 +521,7 @@ Sent directly from Motive App on behalf of anisanursekararum@gmail.com.
 
       {/* Grid: Productivity Charts & Details */}
       <div className="no-print" style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '32px' }}>
-        
+
         {/* Productivity Velocity Card */}
         <Card style={{ borderTop: '4px solid var(--color-motive-dark-blue)', display: 'flex', flexDirection: 'column', gap: '24px', minHeight: '340px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -534,7 +538,7 @@ Sent directly from Motive App on behalf of anisanursekararum@gmail.com.
               <div style={{ fontSize: '10px', color: 'var(--color-motive-light-blue)', fontWeight: 700, letterSpacing: '1px' }}>{t('vs_last')}</div>
             </div>
           </div>
-          
+
           {/* Dual Bar Chart rendering */}
           <div style={{ flex: 1, display: 'flex', alignItems: 'flex-end', gap: '12px', height: '160px', marginTop: 'auto', position: 'relative' }}>
             {velocityData?.data?.map((day, i) => {
@@ -542,10 +546,10 @@ Sent directly from Motive App on behalf of anisanursekararum@gmail.com.
               const completedPct = day.total === 0 ? 0 : (day.completed / velocityData.max) * 100;
               const percent = day.total === 0 ? 0 : Math.round((day.completed / day.total) * 100);
               const formattedLabel = `${day.date.getDate()}-${day.label}`;
-              
+
               return (
-                <div 
-                  key={i} 
+                <div
+                  key={i}
                   onMouseEnter={() => setHoveredBarIndex(i)}
                   onMouseLeave={() => setHoveredBarIndex(null)}
                   style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', height: '100%', justifyContent: 'flex-end', position: 'relative' }}
@@ -582,12 +586,12 @@ Sent directly from Motive App on behalf of anisanursekararum@gmail.com.
                   )}
 
                   {/* Cylinder overlay wrappers */}
-                  <div style={{ 
-                    position: 'relative', 
-                    width: '100%', 
-                    height: '120px', 
-                    display: 'flex', 
-                    alignItems: 'flex-end', 
+                  <div style={{
+                    position: 'relative',
+                    width: '100%',
+                    height: '120px',
+                    display: 'flex',
+                    alignItems: 'flex-end',
                     justifyContent: 'center',
                     cursor: 'pointer'
                   }}>
@@ -600,7 +604,7 @@ Sent directly from Motive App on behalf of anisanursekararum@gmail.com.
                       borderRadius: '4px 4px 0 0',
                       transition: 'height 0.3s ease'
                     }} />
-                    
+
                     {/* Completed Tasks (Navy Foreground Bar - now #4A5FD9) */}
                     <div style={{
                       position: 'absolute',
@@ -617,7 +621,7 @@ Sent directly from Motive App on behalf of anisanursekararum@gmail.com.
               );
             })}
           </div>
-          
+
           <div style={{ display: 'flex', gap: '16px', marginTop: '16px', fontSize: '11px', color: 'var(--text-secondary)', justifyContent: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
               <div style={{ width: '10px', height: '10px', backgroundColor: '#4A5FD9', borderRadius: '2px' }}></div>
@@ -668,8 +672,8 @@ Sent directly from Motive App on behalf of anisanursekararum@gmail.com.
               {t('era_desc')}
             </p>
           </div>
-          <Button 
-            onClick={handleGenerateReport} 
+          <Button
+            onClick={handleGenerateReport}
             disabled={aiLoading}
             style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px' }}
           >
@@ -682,7 +686,8 @@ Sent directly from Motive App on behalf of anisanursekararum@gmail.com.
                 ⚡ {t('generate_report')}
               </>
             )}
-            <style dangerouslySetInnerHTML={{__html: `
+            <style dangerouslySetInnerHTML={{
+              __html: `
               @keyframes spin {
                 from { transform: rotate(0deg); }
                 to { transform: rotate(360deg); }
@@ -699,7 +704,7 @@ Sent directly from Motive App on behalf of anisanursekararum@gmail.com.
           <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
             {/* Featured Latest Summary */}
             <div style={{ paddingBottom: '32px', borderBottom: summaries.length > 1 ? '1px solid var(--border-color)' : 'none' }}>
-              
+
               {/* White wording tag styled inside Motive Dark Blue solid badge */}
               <div style={{
                 display: 'inline-flex',
@@ -716,9 +721,42 @@ Sent directly from Motive App on behalf of anisanursekararum@gmail.com.
                 textTransform: 'uppercase'
               }}>
                 <FiDownload style={{ marginRight: '4px' }} />
-                {language === 'id' 
-                  ? `IKHTISAR SIKLUS ERA TERBARU — ${new Date(summaries[0].date).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}`
-                  : `LATEST COMPREHENSIVE ERA SUMMARY — ${new Date(summaries[0].date).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}`}
+                {language === 'id'
+                  ? 'IKHTISAR SIKLUS ERA TERBARU'
+                  : 'LATEST COMPREHENSIVE ERA SUMMARY'}
+              </div>
+
+              {/* Generation date and period summary */}
+              <div style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '24px',
+                alignItems: 'center',
+                marginBottom: '24px',
+                backgroundColor: 'var(--surface-input)',
+                padding: '16px 20px',
+                borderRadius: '8px',
+                borderLeft: '4px solid var(--color-motive-dark-blue)'
+              }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    {language === 'id' ? 'TANGGAL PEMBUATAN' : 'DATE GENERATED'}
+                  </span>
+                  <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                    {new Date(summaries[0].date).toLocaleString(language === 'id' ? 'id-ID' : 'en-US', { dateStyle: 'medium', timeStyle: 'short' })}
+                  </span>
+                </div>
+
+                <div style={{ height: '24px', width: '1px', backgroundColor: 'var(--border-color)', margin: '0 8px' }} />
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    {language === 'id' ? 'PERIODE LAPORAN' : 'REPORT PERIOD'}
+                  </span>
+                  <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                    {summaries[0].dateRangeStr || 'N/A'}
+                  </span>
+                </div>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '24px' }}>
@@ -741,7 +779,7 @@ Sent directly from Motive App on behalf of anisanursekararum@gmail.com.
                   {formatERAPoints(summaries[0].action)}
                 </div>
               </div>
-              
+
               {/* Render Daily Highlights for the latest featured summary if they exist */}
               {summaries[0].dailyHighlights && summaries[0].dailyHighlights.length > 0 && (
                 <div style={{ marginTop: '24px', backgroundColor: 'var(--surface-input)', padding: '20px', borderRadius: '8px', borderLeft: '4px solid var(--color-motive-light-blue)' }}>
@@ -760,8 +798,8 @@ Sent directly from Motive App on behalf of anisanursekararum@gmail.com.
             {/* View Historical Periodical Reports Button */}
             {summaries.length > 1 && (
               <div style={{ display: 'flex', justifyContent: 'center', marginTop: '8px' }}>
-                <Button 
-                  variant="secondary" 
+                <Button
+                  variant="secondary"
                   onClick={() => {
                     setHistoryPage(1);
                     setSelectedHistorySummary(null);
@@ -775,8 +813,44 @@ Sent directly from Motive App on behalf of anisanursekararum@gmail.com.
             )}
           </div>
         ) : (
-          <div style={{ textAlign: 'center', padding: '48px', color: 'var(--text-secondary)' }}>
-            {t('no_era')}
+          <div style={{
+            textAlign: 'center',
+            padding: '64px 24px',
+            backgroundColor: 'var(--surface-input)',
+            borderRadius: '12px',
+            border: '2px dashed var(--border-color)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '16px',
+            animation: 'fadeIn 0.3s ease'
+          }}>
+            <div style={{
+              fontSize: '48px',
+              color: 'var(--color-motive-light-blue)',
+              opacity: 0.8
+            }}>
+              ✨
+            </div>
+            <h4 style={{
+              margin: 0,
+              fontSize: '20px',
+              fontWeight: 700,
+              color: 'var(--text-primary)'
+            }}>
+              {language === 'id' ? "Mari buat laporan Anda" : "let's generate your report"}
+            </h4>
+            <p style={{
+              margin: 0,
+              fontSize: '14px',
+              color: 'var(--text-secondary)',
+              maxWidth: '460px',
+              lineHeight: 1.5
+            }}>
+              {language === 'id'
+                ? "Klik tombol 'BUAT LAPORAN' di atas untuk menganalisis tugas dan catatan jurnal Anda menggunakan AI."
+                : "Click the 'GENERATE REPORT' button above to analyze your tasks and journal entries using Gemini AI."}
+            </p>
           </div>
         )}
       </Card>
@@ -811,7 +885,7 @@ Sent directly from Motive App on behalf of anisanursekararum@gmail.com.
             flexDirection: 'column',
             gap: '24px'
           }}>
-            
+
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <h3 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '20px', fontWeight: 700 }}>
@@ -919,9 +993,9 @@ Sent directly from Motive App on behalf of anisanursekararum@gmail.com.
                                 {summary.dateRangeStr || 'Custom Period'}
                               </td>
                               <td style={{ padding: '14px 12px', textAlign: 'right' }}>
-                                <Button 
-                                  variant="secondary" 
-                                  style={{ padding: '6px 12px', fontSize: '11px' }} 
+                                <Button
+                                  variant="secondary"
+                                  style={{ padding: '6px 12px', fontSize: '11px' }}
                                   onClick={() => setSelectedHistorySummary(summary)}
                                 >
                                   {language === 'id' ? 'Lihat Laporan' : 'View Report'}
@@ -937,7 +1011,7 @@ Sent directly from Motive App on behalf of anisanursekararum@gmail.com.
                     {historicalSummaries.length > 5 && (
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px' }}>
                         <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                          {language === 'id' 
+                          {language === 'id'
                             ? `Halaman ${historyPage} dari ${Math.ceil(historicalSummaries.length / 5)}`
                             : `Page ${historyPage} of ${Math.ceil(historicalSummaries.length / 5)}`}
                         </span>
@@ -975,7 +1049,7 @@ Sent directly from Motive App on behalf of anisanursekararum@gmail.com.
           </div>
         </div>
       )}
-      
+
     </div>
   );
 }
