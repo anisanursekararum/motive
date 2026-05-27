@@ -32,6 +32,16 @@
   margin: 0;
 }
 
+.logoLink {
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.logoLink:hover {
+  opacity: 0.85;
+}
+
 .welcomeText {
   color: var(--text-secondary);
   font-size: 14px;

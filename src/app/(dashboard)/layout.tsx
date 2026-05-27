@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { OnboardingTour } from '@/components/ui/OnboardingTour';
+import { MotiveLogo } from '@/components/ui/Logo';
 import { FiCheckCircle, FiBookOpen, FiBarChart2, FiSettings, FiSearch, FiSun, FiMoon, FiMonitor, FiGlobe, FiInfo } from 'react-icons/fi';
 import styles from './dashboard.module.css';
 
@@ -131,7 +132,10 @@ function DashboardContent({ children }: DashboardContentProps) {
     <div className={styles.layoutContainer}>
       <header className={styles.topNav}>
         <div className={styles.navLeft}>
-          <h1 className={styles.logo}>{t('logo')}</h1>
+          <Link href="/" className={styles.logoLink} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <MotiveLogo size={28} />
+            <h1 className={styles.logo}>{t('logo')}</h1>
+          </Link>
           <span className={styles.welcomeText}>{t('welcome')}, {profileName}!</span>
         </div>
 
