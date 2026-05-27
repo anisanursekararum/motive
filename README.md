@@ -127,6 +127,40 @@ The easiest way to deploy Motive is to use the [Vercel Platform](https://vercel.
 3.  Add all environment variables from `.env.local` inside the Vercel Project Settings.
 4.  Click **Deploy** — Vercel will automatically construct and serve the build.
 
+### 🐳 Docker Containerization
+
+Motive is fully optimized to run inside containerized environments using the provided `Dockerfile`. It implements a secure, multi-stage Alpine build running Next.js in `standalone` output mode to maintain a minimal footprint (~100MB).
+
+#### 1. Build the Docker Image
+
+To build the optimized production image:
+
+```bash
+docker build -t motive-app .
+```
+
+#### 2. Run the Container Locally
+
+Run the container by passing your environment credentials (matching your `.env.local` keys):
+
+```bash
+docker run -p 3000:3000 \
+  -e NEXT_PUBLIC_FIREBASE_API_KEY="your_api_key" \
+  -e NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="your_auth_domain" \
+  -e NEXT_PUBLIC_FIREBASE_PROJECT_ID="your_project_id" \
+  -e NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET="your_storage_bucket" \
+  -e NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="your_sender_id" \
+  -e NEXT_PUBLIC_FIREBASE_APP_ID="your_app_id" \
+  -e GEMINI_API_KEY="your_gemini_key" \
+  -e SMTP_HOST="smtp.gmail.com" \
+  -e SMTP_PORT="465" \
+  -e SMTP_USER="your_email@gmail.com" \
+  -e SMTP_PASS="your_gmail_app_password" \
+  motive-app
+```
+
+Once running, navigate to **[http://localhost:3000](http://localhost:3000)** in your browser.
+
 ---
 
 ## 🔒 Privacy & Architecture
