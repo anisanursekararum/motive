@@ -178,7 +178,41 @@ export default function LandingPage() {
   const { language, setLanguage } = useLanguage();
   const { theme, setTheme } = useTheme();
 
+  const [scrolled, setScrolled] = useState(false);
+
   const t = contentTranslations[language] || contentTranslations.en;
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 20) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, {
+      threshold: 0.08,
+      rootMargin: '0px 0px -40px 0px'
+    });
+
+    const animatedElements = document.querySelectorAll('.animate-fade-in-up, .animate-scale-in');
+    animatedElements.forEach((el) => observer.observe(el));
+
+    return () => {
+      animatedElements.forEach((el) => observer.unobserve(el));
+    };
+  }, [loading]);
 
   useEffect(() => {
     if (user && signingIn) {
@@ -251,10 +285,134 @@ export default function LandingPage() {
           color: var(--color-motive-light-blue);
           background: var(--surface-bg);
         }
+
+        /* ── Custom Theme Gradients & Mesh Backgrounds ── */
+        :root {
+          --header-bg: rgba(245, 247, 250, 0.82);
+          --hero-mesh-bg: radial-gradient(circle at 80% 20%, rgba(74, 95, 217, 0.08) 0%, transparent 50%),
+                           radial-gradient(circle at 10% 80%, rgba(46, 58, 140, 0.04) 0%, transparent 50%),
+                           var(--surface-bg);
+          --challenge-section-bg: linear-gradient(180deg, var(--surface-bg) 0%, var(--surface-card) 100%);
+          --demo-section-bg: radial-gradient(circle at 50% 50%, #161a36 0%, #0d0f1f 100%);
+          --ecosystem-section-bg: radial-gradient(rgba(46, 58, 140, 0.04) 1.5px, transparent 1.5px) 0 0 / 24px 24px,
+                                  var(--surface-bg);
+          --features-section-bg: linear-gradient(135deg, var(--surface-card) 0%, var(--surface-bg) 100%);
+          --cta-section-bg: radial-gradient(circle at 10% 20%, rgba(74, 95, 217, 0.05) 0%, transparent 50%),
+                            radial-gradient(circle at 90% 80%, rgba(46, 58, 140, 0.05) 0%, transparent 50%),
+                            var(--surface-bg);
+        }
+
+        [data-theme="dark"] {
+          --header-bg: rgba(15, 17, 23, 0.82);
+          --hero-mesh-bg: radial-gradient(circle at 80% 20%, rgba(74, 95, 217, 0.15) 0%, transparent 50%),
+                           radial-gradient(circle at 10% 80%, rgba(26, 34, 84, 0.25) 0%, transparent 50%),
+                           var(--surface-bg);
+          --challenge-section-bg: linear-gradient(180deg, var(--surface-bg) 0%, var(--surface-card) 100%);
+          --demo-section-bg: radial-gradient(circle at 50% 50%, #0d0f1f 0%, #06070e 100%);
+          --ecosystem-section-bg: radial-gradient(rgba(255, 255, 255, 0.03) 1.5px, transparent 1.5px) 0 0 / 24px 24px,
+                                  var(--surface-bg);
+          --features-section-bg: linear-gradient(135deg, var(--surface-card) 0%, var(--surface-bg) 100%);
+          --cta-section-bg: radial-gradient(circle at 10% 20%, rgba(74, 95, 217, 0.08) 0%, transparent 50%),
+                            radial-gradient(circle at 90% 80%, rgba(26, 34, 84, 0.15) 0%, transparent 50%),
+                            var(--surface-bg);
+        }
+
+        /* ── Scroll Animations ── */
+        .animate-fade-in-up {
+          opacity: 0;
+          transform: translateY(30px);
+          transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .animate-fade-in-up.visible {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        .animate-scale-in {
+          opacity: 0;
+          transform: scale(0.96);
+          transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .animate-scale-in.visible {
+          opacity: 1;
+          transform: scale(1);
+        }
+
+        .delay-100 { transition-delay: 100ms; }
+        .delay-150 { transition-delay: 150ms; }
+        .delay-200 { transition-delay: 200ms; }
+        .delay-300 { transition-delay: 300ms; }
+
+        /* ── Fixed Header ── */
+        .fixed-header {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          z-index: 1000;
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          background-color: var(--header-bg);
+          border-bottom: 1px solid var(--divider-color);
+          padding: 16px 24px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .fixed-header.scrolled {
+          padding: 12px 24px;
+          box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+          border-bottom-color: rgba(74, 95, 217, 0.12);
+        }
+
+        @media (min-width: 1024px) {
+          .fixed-header {
+            padding: 16px 48px;
+          }
+          .fixed-header.scrolled {
+            padding: 12px 48px;
+          }
+        }
+
+        /* ── Phone Mockup Chat Animation ── */
+        .phone-chat-card-1 {
+          opacity: 0;
+          transform: translateY(20px) scale(0.95);
+          animation: phoneCard1 12s infinite cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .phone-chat-card-2 {
+          opacity: 0;
+          transform: translateY(20px) scale(0.95);
+          animation: phoneCard2 12s infinite cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .phone-chat-card-3 {
+          opacity: 0;
+          transform: translateY(20px) scale(0.95);
+          animation: phoneCard3 12s infinite cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes phoneCard1 {
+          0%, 5% { opacity: 0; transform: translateY(20px) scale(0.95); }
+          12%, 85% { opacity: 1; transform: translateY(0) scale(1); }
+          90%, 100% { opacity: 0; transform: translateY(-10px) scale(0.98); }
+        }
+
+        @keyframes phoneCard2 {
+          0%, 28% { opacity: 0; transform: translateY(20px) scale(0.95); }
+          35%, 85% { opacity: 1; transform: translateY(0) scale(1); }
+          90%, 100% { opacity: 0; transform: translateY(-10px) scale(0.98); }
+        }
+
+        @keyframes phoneCard3 {
+          0%, 52% { opacity: 0; transform: translateY(20px) scale(0.95); }
+          59%, 85% { opacity: 1; transform: translateY(0) scale(1); }
+          90%, 100% { opacity: 0; transform: translateY(-10px) scale(0.98); }
+        }
       `}} />
 
-      {/* Header */}
-      <header style={{ display: 'flex', justifyContent: 'space-between', padding: '24px 48px', alignItems: 'center', borderBottom: '1px solid var(--divider-color)', backgroundColor: 'var(--surface-card)' }}>
+      {/* Header (Fixed with glassmorphism and scroll shadow) */}
+      <header className={`fixed-header ${scrolled ? 'scrolled' : ''}`}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => router.push('/')}>
           <MotiveLogo size={36} />
           <h1 style={{ color: 'var(--text-primary)', margin: 0, fontSize: '24px', fontWeight: 'bold' }}>{t.logoText}</h1>
@@ -296,518 +454,592 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* Hero Section */}
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '64px 24px' }}>
-        <div style={{ maxWidth: '1200px', width: '100%', display: 'flex', gap: '48px', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
-          <div style={{ flex: '1 1 500px', maxWidth: '550px' }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: 'var(--chip-bg)', color: 'var(--color-motive-light-blue)', padding: '6px 14px', borderRadius: '20px', fontSize: '13px', fontWeight: '700', marginBottom: '24px' }}>
-              {t.tagline}
+      {/* Main Content Sections (Full bleed styled backgrounds with scroll entry animations) */}
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', transition: 'all 0.3s ease' }}>
+        
+        {/* Section 1: Hero Section (Soft glow mesh backdrop) */}
+        <section style={{
+          background: 'var(--hero-mesh-bg)',
+          padding: '160px 24px 100px 24px',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          position: 'relative',
+          overflow: 'hidden',
+          borderBottom: '1px solid var(--divider-color)',
+          transition: 'all 0.3s ease'
+        }}>
+          <div className="animate-fade-in-up visible" style={{ maxWidth: '1200px', width: '100%', display: 'flex', gap: '48px', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+            <div style={{ flex: '1 1 500px', maxWidth: '550px' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: 'var(--chip-bg)', color: 'var(--color-motive-light-blue)', padding: '6px 14px', borderRadius: '20px', fontSize: '13px', fontWeight: '700', marginBottom: '24px' }}>
+                {t.tagline}
+              </div>
+              <h2 style={{ fontSize: '48px', fontWeight: '800', color: 'var(--text-primary)', lineHeight: 1.15, marginBottom: '24px', letterSpacing: '-0.02em' }}>
+                {t.titleLine1} <span style={{ color: 'var(--color-motive-light-blue)' }}>{t.titleLine2}</span> {t.titleLine3}
+              </h2>
+              <p style={{ fontSize: '16px', color: 'var(--text-secondary)', marginBottom: '32px', lineHeight: 1.6 }}>
+                {t.description}
+              </p>
+
+              <div style={{ maxWidth: '380px' }}>
+                <Button onClick={handleLogin} style={{ width: '100%', padding: '16px', fontSize: '16px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '12px', fontWeight: '700', borderRadius: '8px' }}>
+                  {!user && <GoogleIcon />}
+                  <span>{user ? t.goToDashboard : t.continueGoogle}</span>
+                </Button>
+              </div>
             </div>
-            <h2 style={{ fontSize: '48px', fontWeight: '800', color: 'var(--text-primary)', lineHeight: 1.15, marginBottom: '24px', letterSpacing: '-0.02em' }}>
-              {t.titleLine1} <span style={{ color: 'var(--color-motive-light-blue)' }}>{t.titleLine2}</span> {t.titleLine3}
-            </h2>
-            <p style={{ fontSize: '16px', color: 'var(--text-secondary)', marginBottom: '32px', lineHeight: 1.6 }}>
-              {t.description}
+
+            <div className="animate-scale-in visible delay-200" style={{ flex: '1 1 400px', display: 'flex', justifyContent: 'center' }}>
+              <div style={{
+                backgroundColor: 'var(--surface-card)',
+                borderRadius: '28px',
+                padding: '20px',
+                boxShadow: 'var(--shadow-level-2)',
+                border: '1px solid var(--border-color)'
+              }}>
+                <div style={{ width: '300px', height: '560px', backgroundColor: 'var(--color-motive-navy)', borderRadius: '24px', overflow: 'hidden', position: 'relative' }}>
+                  {/* Mock phone content */}
+                  <div style={{ padding: '24px', color: 'white', paddingTop: '48px', height: '100%', display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                      <span style={{ fontSize: '18px', fontWeight: 'bold' }}>{t.phoneTitle}</span>
+                      <span style={{ fontSize: '11px', opacity: 0.6 }}>{t.phoneSubtitle}</span>
+                    </div>
+                    <div className="phone-chat-card-1" style={{ backgroundColor: 'rgba(255,255,255,0.06)', padding: '16px', borderRadius: '12px', marginBottom: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--color-motive-light-blue)', textTransform: 'uppercase', marginBottom: '4px', letterSpacing: '0.05em' }}>{t.phoneExpTitle}</div>
+                      <div style={{ fontSize: '13px', opacity: 0.9, lineHeight: 1.4 }}>{t.phoneExpDesc}</div>
+                    </div>
+                    <div className="phone-chat-card-2" style={{ backgroundColor: 'rgba(255,255,255,0.06)', padding: '16px', borderRadius: '12px', marginBottom: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#fbbf24', textTransform: 'uppercase', marginBottom: '4px', letterSpacing: '0.05em' }}>{t.phoneRefTitle}</div>
+                      <div style={{ fontSize: '13px', opacity: 0.9, lineHeight: 1.4 }}>{t.phoneRefDesc}</div>
+                    </div>
+                    <div className="phone-chat-card-3" style={{ backgroundColor: 'rgba(255,255,255,0.06)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#34d399', textTransform: 'uppercase', marginBottom: '4px', letterSpacing: '0.05em' }}>{t.phoneActTitle}</div>
+                      <div style={{ fontSize: '13px', opacity: 0.9, lineHeight: 1.4 }}>{t.phoneActDesc}</div>
+                    </div>
+
+                    <div style={{ marginTop: 'auto', textAlign: 'center', fontSize: '11px', opacity: 0.4 }}>
+                      {t.phoneFooter}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Section 2: Challenge & Balance Section (Linear surface gradient) */}
+        <section style={{
+          background: 'var(--challenge-section-bg)',
+          padding: '100px 24px',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          transition: 'all 0.3s ease'
+        }}>
+          <div style={{ maxWidth: '1000px', width: '100%', textAlign: 'center' }}>
+            <h3 className="animate-fade-in-up" style={{ fontSize: '32px', color: 'var(--text-primary)', marginBottom: '48px', fontWeight: '700', letterSpacing: '-0.02em' }}>
+              {t.problemSolutionHeader}
+            </h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '32px', textAlign: 'left' }}>
+              
+              {/* The Problem Card */}
+              <div className="animate-fade-in-up" style={{
+                backgroundColor: 'var(--surface-card)',
+                padding: '36px 32px',
+                borderRadius: '20px',
+                boxShadow: 'var(--shadow-level-1)',
+                border: '1px solid rgba(239, 68, 68, 0.15)',
+                position: 'relative',
+                overflow: 'hidden',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-6px)';
+                e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+                e.currentTarget.style.boxShadow = 'var(--shadow-level-2)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'none';
+                e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.15)';
+                e.currentTarget.style.boxShadow = 'var(--shadow-level-1)';
+              }}>
+                <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', backgroundColor: '#ef4444' }} />
+                <h4 style={{ color: '#ef4444', fontSize: '18px', fontWeight: '700', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '20px' }}>⚠️</span> {t.problemTitle}
+                </h4>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '15px', lineHeight: 1.6, margin: 0 }}>
+                  {t.problemDesc}
+                </p>
+              </div>
+
+              {/* The Solution Card */}
+              <div className="animate-fade-in-up delay-150" style={{
+                backgroundColor: 'var(--surface-card)',
+                padding: '36px 32px',
+                borderRadius: '20px',
+                boxShadow: 'var(--shadow-level-1)',
+                border: '1px solid rgba(74, 95, 217, 0.15)',
+                position: 'relative',
+                overflow: 'hidden',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-6px)';
+                e.currentTarget.style.borderColor = 'var(--color-motive-light-blue)';
+                e.currentTarget.style.boxShadow = 'var(--shadow-level-2)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'none';
+                e.currentTarget.style.borderColor = 'rgba(74, 95, 217, 0.15)';
+                e.currentTarget.style.boxShadow = 'var(--shadow-level-1)';
+              }}>
+                <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', backgroundColor: 'var(--color-motive-light-blue)' }} />
+                <h4 style={{ color: 'var(--color-motive-light-blue)', fontSize: '18px', fontWeight: '700', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '20px' }}>✨</span> {t.solutionTitle}
+                </h4>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '15px', lineHeight: 1.6, margin: 0 }}>
+                  {t.solutionDesc}
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Section 3: YouTube Video Demo Section (Deep cinema mode background) */}
+        <section style={{
+          background: 'var(--demo-section-bg)',
+          padding: '100px 24px',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          transition: 'all 0.3s ease',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.05)'
+        }}>
+          <div style={{ maxWidth: '1000px', width: '100%', textAlign: 'center' }}>
+            <h3 className="animate-fade-in-up" style={{ fontSize: '32px', color: '#FFFFFF', marginBottom: '16px', fontWeight: '700', letterSpacing: '-0.02em' }}>
+              {t.demoHeader}
+            </h3>
+            <p className="animate-fade-in-up delay-100" style={{ color: 'rgba(255, 255, 255, 0.7)', marginBottom: '48px', fontSize: '16px', maxWidth: '600px', margin: '0 auto 48px auto', lineHeight: 1.6 }}>
+              {t.demoSub}
             </p>
 
-            <div style={{ maxWidth: '380px' }}>
-              <Button onClick={handleLogin} style={{ width: '100%', padding: '16px', fontSize: '16px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '12px', fontWeight: '700', borderRadius: '8px' }}>
+            <div className="animate-scale-in" style={{
+              position: 'relative',
+              width: '100%',
+              paddingBottom: '56.25%', /* 16:9 Aspect Ratio */
+              height: 0,
+              overflow: 'hidden',
+              borderRadius: '20px',
+              boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5)',
+              backgroundColor: '#000',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+            }}>
+              <iframe
+                src="https://www.youtube.com/embed/J86kq1aUwlQ?autoplay=1&mute=1&loop=1&playlist=J86kq1aUwlQ"
+                title="Motive Application Demo"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  border: 0,
+                  borderRadius: '20px',
+                }}
+              />
+            </div>
+
+            {/* YouTube Section 3-Column Info Cards (Dark glass theme for Cinema Mode) */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px', marginTop: '56px', textAlign: 'left' }}>
+              <div className="animate-fade-in-up" style={{ padding: '28px 24px', backgroundColor: 'rgba(255, 255, 255, 0.04)', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.08)', backdropFilter: 'blur(8px)' }}>
+                <h4 style={{ fontSize: '16px', fontWeight: '700', color: '#FFFFFF', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px', marginTop: 0 }}>
+                  <span style={{ fontSize: '18px' }}>✅</span> {t.demoInfoTasksTitle}
+                </h4>
+                <p style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.7)', margin: 0, lineHeight: 1.5 }}>
+                  {t.demoInfoTasksDesc}
+                </p>
+              </div>
+              <div className="animate-fade-in-up delay-100" style={{ padding: '28px 24px', backgroundColor: 'rgba(255, 255, 255, 0.04)', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.08)', backdropFilter: 'blur(8px)' }}>
+                <h4 style={{ fontSize: '16px', fontWeight: '700', color: '#FFFFFF', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px', marginTop: 0 }}>
+                  <span style={{ fontSize: '18px' }}>📝</span> {t.demoInfoJournalsTitle}
+                </h4>
+                <p style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.7)', margin: 0, lineHeight: 1.5 }}>
+                  {t.demoInfoJournalsDesc}
+                </p>
+              </div>
+              <div className="animate-fade-in-up delay-200" style={{ padding: '28px 24px', backgroundColor: 'rgba(255, 255, 255, 0.04)', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.08)', backdropFilter: 'blur(8px)' }}>
+                <h4 style={{ fontSize: '16px', fontWeight: '700', color: '#FFFFFF', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px', marginTop: 0 }}>
+                  <span style={{ fontSize: '18px' }}>📈</span> {t.demoInfoReportsTitle}
+                </h4>
+                <p style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.7)', margin: 0, lineHeight: 1.5 }}>
+                  {t.demoInfoReportsDesc}
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Section 4: Ecosystem Section (Subtle dot grid backdrop) */}
+        <section style={{
+          background: 'var(--ecosystem-section-bg)',
+          padding: '100px 24px',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          transition: 'all 0.3s ease',
+          borderBottom: '1px solid var(--divider-color)'
+        }}>
+          <div style={{ maxWidth: '1000px', width: '100%' }}>
+            <div style={{ textAlign: 'center', marginBottom: '64px' }}>
+              <h3 className="animate-fade-in-up" style={{ fontSize: '32px', color: 'var(--text-primary)', marginBottom: '16px', fontWeight: '700', letterSpacing: '-0.02em' }}>
+                {t.coreHeader}
+              </h3>
+              <p className="animate-fade-in-up delay-100" style={{ color: 'var(--text-secondary)', maxWidth: '700px', margin: '0 auto', fontSize: '16px', lineHeight: 1.6 }}>
+                {t.coreSub}
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', gap: '48px', alignItems: 'stretch', flexWrap: 'wrap' }}>
+              {/* Features List */}
+              <div style={{ flex: '1 1 500px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                
+                {/* Tasks feature */}
+                <div className="animate-fade-in-up" style={{ backgroundColor: 'var(--surface-card)', padding: '24px', borderRadius: '16px', boxShadow: 'var(--shadow-level-1)', border: '1px solid var(--border-color)', position: 'relative' }}>
+                  <span style={{ position: 'absolute', top: '16px', right: '16px', fontSize: '11px', fontWeight: 'bold', color: 'var(--color-motive-light-blue)', backgroundColor: 'var(--chip-bg)', padding: '4px 8px', borderRadius: '4px' }}>
+                    {t.featTasksBadge}
+                  </span>
+                  <h4 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: '700', marginBottom: '8px', marginTop: 0 }}>
+                    {t.featTasksTitle}
+                  </h4>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: 1.5, margin: 0 }}>
+                    {t.featTasksDesc}
+                  </p>
+                </div>
+
+                {/* Journals feature */}
+                <div className="animate-fade-in-up delay-100" style={{ backgroundColor: 'var(--surface-card)', padding: '24px', borderRadius: '16px', boxShadow: 'var(--shadow-level-1)', border: '1px solid var(--border-color)', position: 'relative' }}>
+                  <span style={{ position: 'absolute', top: '16px', right: '16px', fontSize: '11px', fontWeight: 'bold', color: '#fbbf24', backgroundColor: 'rgba(251, 191, 36, 0.1)', padding: '4px 8px', borderRadius: '4px' }}>
+                    {t.featJournalsBadge}
+                  </span>
+                  <h4 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: '700', marginBottom: '8px', marginTop: 0 }}>
+                    {t.featJournalsTitle}
+                  </h4>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: 1.5, margin: 0 }}>
+                    {t.featJournalsDesc}
+                  </p>
+                </div>
+
+                {/* Reports feature */}
+                <div className="animate-fade-in-up delay-200" style={{ backgroundColor: 'var(--surface-card)', padding: '24px', borderRadius: '16px', boxShadow: 'var(--shadow-level-1)', border: '1px solid var(--border-color)', position: 'relative' }}>
+                  <span style={{ position: 'absolute', top: '16px', right: '16px', fontSize: '11px', fontWeight: 'bold', color: '#34d399', backgroundColor: 'rgba(52, 211, 153, 0.1)', padding: '4px 8px', borderRadius: '4px' }}>
+                    {t.featReportsBadge}
+                  </span>
+                  <h4 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: '700', marginBottom: '8px', marginTop: 0 }}>
+                    {t.featReportsTitle}
+                  </h4>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: 1.5, margin: 0 }}>
+                    {t.featReportsDesc}
+                  </p>
+                </div>
+
+                {/* AI summaries feature */}
+                <div className="animate-fade-in-up delay-300" style={{ backgroundColor: 'var(--surface-card)', padding: '24px', borderRadius: '16px', boxShadow: 'var(--shadow-level-1)', border: '1px solid var(--color-motive-light-blue)', position: 'relative' }}>
+                  <span style={{ position: 'absolute', top: '16px', right: '16px', fontSize: '11px', fontWeight: 'bold', color: 'white', backgroundColor: 'var(--color-motive-light-blue)', padding: '4px 8px', borderRadius: '4px' }}>
+                    {t.featAiBadge}
+                  </span>
+                  <h4 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: '700', marginBottom: '8px', marginTop: 0 }}>
+                    ✨ {t.featAiTitle}
+                  </h4>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: 1.5, margin: 0 }}>
+                    {t.featAiDesc}
+                  </p>
+                </div>
+              </div>
+
+              {/* Interactive Media Sidebar Mockup */}
+              <div className="animate-scale-in delay-200" style={{ flex: '1 1 350px', display: 'flex', flexDirection: 'column', gap: '24px', justifyContent: 'center' }}>
+                <div style={{
+                  backgroundColor: 'var(--surface-card)',
+                  borderRadius: '24px',
+                  padding: '24px',
+                  boxShadow: 'var(--shadow-level-2)',
+                  border: '1px solid var(--border-color)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '24px'
+                }}>
+                  
+                  {/* Productivity Velocity Mini-Widget */}
+                  <div>
+                    <h5 style={{ color: 'var(--text-primary)', fontSize: '14px', fontWeight: 'bold', margin: '0 0 16px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span>📈 Productivity Velocity</span>
+                      <span style={{ color: 'var(--color-motive-light-blue)', fontSize: '12px' }}>+24% this week</span>
+                    </h5>
+                    <div style={{ display: 'flex', alignItems: 'flex-end', height: '120px', gap: '12px', borderBottom: '1px solid var(--divider-color)', paddingBottom: '8px', paddingLeft: '8px', paddingRight: '8px' }}>
+                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ width: '100%', height: '40px', backgroundColor: 'var(--chip-bg)', borderRadius: '4px' }}></div>
+                        <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>M</span>
+                      </div>
+                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ width: '100%', height: '70px', backgroundColor: 'var(--chip-bg)', borderRadius: '4px' }}></div>
+                        <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>T</span>
+                      </div>
+                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ width: '100%', height: '55px', backgroundColor: 'var(--chip-bg)', borderRadius: '4px' }}></div>
+                        <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>W</span>
+                      </div>
+                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ width: '100%', height: '95px', backgroundColor: 'var(--color-motive-light-blue)', borderRadius: '4px' }}></div>
+                        <span style={{ fontSize: '10px', color: 'var(--text-primary)', fontWeight: 'bold' }}>T</span>
+                      </div>
+                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ width: '100%', height: '45px', backgroundColor: 'var(--chip-bg)', borderRadius: '4px' }}></div>
+                        <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>F</span>
+                      </div>
+                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ width: '100%', height: '20px', backgroundColor: 'var(--chip-bg)', borderRadius: '4px' }}></div>
+                        <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>S</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Focus Split Mini-Widget */}
+                  <div>
+                    <h5 style={{ color: 'var(--text-primary)', fontSize: '14px', fontWeight: 'bold', margin: '0 0 12px 0' }}>
+                      🎯 Focus Split Ratios
+                    </h5>
+                    {/* Custom Color Bar Split */}
+                    <div style={{ height: '16px', borderRadius: '8px', display: 'flex', overflow: 'hidden', marginBottom: '16px' }}>
+                      <div style={{ width: '55%', backgroundColor: 'var(--color-motive-dark-blue)' }} title="Work: 55%"></div>
+                      <div style={{ width: '20%', backgroundColor: '#4a5fd9' }} title="Study: 20%"></div>
+                      <div style={{ width: '15%', backgroundColor: '#fbbf24' }} title="Personal: 15%"></div>
+                      <div style={{ width: '10%', backgroundColor: '#34d399' }} title="Health: 10%"></div>
+                    </div>
+                    {/* Legends */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', fontSize: '12px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)' }}>
+                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--color-motive-dark-blue)' }}></div>
+                        <span>Work (55%)</span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)' }}>
+                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#4a5fd9' }}></div>
+                        <span>Study (20%)</span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)' }}>
+                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#fbbf24' }}></div>
+                        <span>Personal (15%)</span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)' }}>
+                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#34d399' }}></div>
+                        <span>Health (10%)</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Section 5: Features Grid Section (Linear color sweep) */}
+        <section style={{
+          background: 'var(--features-section-bg)',
+          padding: '100px 24px',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          transition: 'all 0.3s ease',
+          borderBottom: '1px solid var(--divider-color)'
+        }}>
+          <div style={{ textAlign: 'center', maxWidth: '1000px', width: '100%' }}>
+            <h3 className="animate-fade-in-up" style={{ fontSize: '32px', color: 'var(--text-primary)', marginBottom: '16px', fontWeight: '700', letterSpacing: '-0.02em' }}>
+              {t.featuresHeader}
+            </h3>
+            <p className="animate-fade-in-up delay-100" style={{ color: 'var(--text-secondary)', marginBottom: '64px', maxWidth: '700px', margin: '0 auto 64px auto', fontSize: '16px', lineHeight: 1.6 }}>
+              {t.featuresSub}
+            </p>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+              gap: '24px',
+              textAlign: 'left'
+            }}>
+              {/* Feature 1 */}
+              <div className="animate-fade-in-up" style={{
+                backgroundColor: 'var(--surface-card)',
+                padding: '32px 24px',
+                borderRadius: '16px',
+                boxShadow: 'var(--shadow-level-1)',
+                border: '1px solid var(--border-color)',
+                transition: 'all 0.3s ease',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '16px'
+              }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-6px)';
+                  e.currentTarget.style.boxShadow = 'var(--shadow-level-2)';
+                  e.currentTarget.style.borderColor = 'var(--color-motive-light-blue)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'none';
+                  e.currentTarget.style.boxShadow = 'var(--shadow-level-1)';
+                  e.currentTarget.style.borderColor = 'var(--border-color)';
+                }}
+              >
+                <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: 'var(--chip-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <FiDatabase size={24} style={{ color: 'var(--color-motive-light-blue)' }} />
+                </div>
+                <h4 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: '700', margin: 0 }}>
+                  {t.feature1Title}
+                </h4>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: 1.5, margin: 0 }}>
+                  {t.feature1Desc}
+                </p>
+              </div>
+
+              {/* Feature 2 */}
+              <div className="animate-fade-in-up delay-100" style={{
+                backgroundColor: 'var(--surface-card)',
+                padding: '32px 24px',
+                borderRadius: '16px',
+                boxShadow: 'var(--shadow-level-1)',
+                border: '1px solid var(--border-color)',
+                transition: 'all 0.3s ease',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '16px'
+              }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-6px)';
+                  e.currentTarget.style.boxShadow = 'var(--shadow-level-2)';
+                  e.currentTarget.style.borderColor = 'var(--color-motive-light-blue)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'none';
+                  e.currentTarget.style.boxShadow = 'var(--shadow-level-1)';
+                  e.currentTarget.style.borderColor = 'var(--border-color)';
+                }}
+              >
+                <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: 'var(--chip-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <FiShield size={24} style={{ color: 'var(--color-motive-light-blue)' }} />
+                </div>
+                <h4 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: '700', margin: 0 }}>
+                  {t.feature2Title}
+                </h4>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: 1.5, margin: 0 }}>
+                  {t.feature2Desc}
+                </p>
+              </div>
+
+              {/* Feature 3 */}
+              <div className="animate-fade-in-up delay-200" style={{
+                backgroundColor: 'var(--surface-card)',
+                padding: '32px 24px',
+                borderRadius: '16px',
+                boxShadow: 'var(--shadow-level-1)',
+                border: '1px solid var(--border-color)',
+                transition: 'all 0.3s ease',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '16px'
+              }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-6px)';
+                  e.currentTarget.style.boxShadow = 'var(--shadow-level-2)';
+                  e.currentTarget.style.borderColor = 'var(--color-motive-light-blue)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'none';
+                  e.currentTarget.style.boxShadow = 'var(--shadow-level-1)';
+                  e.currentTarget.style.borderColor = 'var(--border-color)';
+                }}
+              >
+                <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: 'var(--chip-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <FiCpu size={24} style={{ color: 'var(--color-motive-light-blue)' }} />
+                </div>
+                <h4 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: '700', margin: 0 }}>
+                  {t.feature3Title}
+                </h4>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: 1.5, margin: 0 }}>
+                  {t.feature3Desc}
+                </p>
+              </div>
+
+              {/* Feature 4 */}
+              <div className="animate-fade-in-up delay-300" style={{
+                backgroundColor: 'var(--surface-card)',
+                padding: '32px 24px',
+                borderRadius: '16px',
+                boxShadow: 'var(--shadow-level-1)',
+                border: '1px solid var(--border-color)',
+                transition: 'all 0.3s ease',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '16px'
+              }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-6px)';
+                  e.currentTarget.style.boxShadow = 'var(--shadow-level-2)';
+                  e.currentTarget.style.borderColor = 'var(--color-motive-light-blue)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'none';
+                  e.currentTarget.style.boxShadow = 'var(--shadow-level-1)';
+                  e.currentTarget.style.borderColor = 'var(--border-color)';
+                }}
+              >
+                <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: 'var(--chip-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <FiDownloadCloud size={24} style={{ color: 'var(--color-motive-light-blue)' }} />
+                </div>
+                <h4 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: '700', margin: 0 }}>
+                  {t.feature4Title}
+                </h4>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: 1.5, margin: 0 }}>
+                  {t.feature4Desc}
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Section 6: Bottom Call to Action Section (Vibrant gradient with glass card overlay) */}
+        <section style={{
+          background: 'var(--cta-section-bg)',
+          padding: '100px 24px',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          transition: 'all 0.3s ease'
+        }}>
+          <div className="animate-scale-in" style={{
+            maxWidth: '1000px',
+            width: '100%',
+            textAlign: 'center',
+            backgroundColor: 'var(--surface-card)',
+            padding: '64px 40px',
+            borderRadius: '24px',
+            boxShadow: 'var(--shadow-level-2)',
+            border: '1px solid var(--color-motive-light-blue)',
+            boxSizing: 'border-box'
+          }}>
+            <h3 style={{ fontSize: '32px', color: 'var(--text-primary)', marginBottom: '16px', fontWeight: '700', letterSpacing: '-0.02em', marginTop: 0 }}>
+              {t.ctaHeader}
+            </h3>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '32px', fontSize: '16px', maxWidth: '580px', margin: '0 auto 32px auto', lineHeight: 1.6 }}>
+              {t.ctaSub}
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <Button onClick={handleLogin} style={{ padding: '16px 36px', fontSize: '16px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '12px', fontWeight: '700', borderRadius: '8px' }}>
                 {!user && <GoogleIcon />}
-                <span>{user ? t.goToDashboard : t.continueGoogle}</span>
+                <span>{user ? t.goToDashboard : t.ctaButton}</span>
               </Button>
             </div>
           </div>
-
-          <div style={{ flex: '1 1 400px', display: 'flex', justifyContent: 'center' }}>
-            <div style={{
-              backgroundColor: 'var(--surface-card)',
-              borderRadius: '28px',
-              padding: '20px',
-              boxShadow: 'var(--shadow-level-2)',
-              border: '1px solid var(--border-color)'
-            }}>
-              <div style={{ width: '300px', height: '560px', backgroundColor: 'var(--color-motive-navy)', borderRadius: '24px', overflow: 'hidden', position: 'relative' }}>
-                {/* Mock phone content */}
-                <div style={{ padding: '24px', color: 'white', paddingTop: '48px', height: '100%', display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                    <span style={{ fontSize: '18px', fontWeight: 'bold' }}>{t.phoneTitle}</span>
-                    <span style={{ fontSize: '11px', opacity: 0.6 }}>{t.phoneSubtitle}</span>
-                  </div>
-                  <div style={{ backgroundColor: 'rgba(255,255,255,0.06)', padding: '16px', borderRadius: '12px', marginBottom: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
-                    <div style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--color-motive-light-blue)', textTransform: 'uppercase', marginBottom: '4px', letterSpacing: '0.05em' }}>{t.phoneExpTitle}</div>
-                    <div style={{ fontSize: '13px', opacity: 0.9, lineHeight: 1.4 }}>{t.phoneExpDesc}</div>
-                  </div>
-                  <div style={{ backgroundColor: 'rgba(255,255,255,0.06)', padding: '16px', borderRadius: '12px', marginBottom: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
-                    <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#fbbf24', textTransform: 'uppercase', marginBottom: '4px', letterSpacing: '0.05em' }}>{t.phoneRefTitle}</div>
-                    <div style={{ fontSize: '13px', opacity: 0.9, lineHeight: 1.4 }}>{t.phoneRefDesc}</div>
-                  </div>
-                  <div style={{ backgroundColor: 'rgba(255,255,255,0.06)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
-                    <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#34d399', textTransform: 'uppercase', marginBottom: '4px', letterSpacing: '0.05em' }}>{t.phoneActTitle}</div>
-                    <div style={{ fontSize: '13px', opacity: 0.9, lineHeight: 1.4 }}>{t.phoneActDesc}</div>
-                  </div>
-
-                  <div style={{ marginTop: 'auto', textAlign: 'center', fontSize: '11px', opacity: 0.4 }}>
-                    {t.phoneFooter}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* The Challenge & Balance (Problem & Solution) Section */}
-        <div style={{ marginTop: '120px', maxWidth: '1000px', width: '100%', textAlign: 'center' }}>
-          <h3 style={{ fontSize: '32px', color: 'var(--text-primary)', marginBottom: '40px', fontWeight: '700', letterSpacing: '-0.02em' }}>
-            {t.problemSolutionHeader}
-          </h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '32px', textAlign: 'left' }}>
-            {/* The Problem Card */}
-            <div style={{
-              backgroundColor: 'var(--surface-card)',
-              padding: '32px',
-              borderRadius: '20px',
-              boxShadow: 'var(--shadow-level-1)',
-              border: '1px solid rgba(239, 68, 68, 0.2)',
-              position: 'relative',
-              overflow: 'hidden'
-            }}>
-              <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', backgroundColor: '#ef4444' }} />
-              <h4 style={{ color: '#ef4444', fontSize: '18px', fontWeight: '700', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '20px' }}>⚠️</span> {t.problemTitle}
-              </h4>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '15px', lineHeight: 1.6, margin: 0 }}>
-                {t.problemDesc}
-              </p>
-            </div>
-
-            {/* The Solution Card */}
-            <div style={{
-              backgroundColor: 'var(--surface-card)',
-              padding: '32px',
-              borderRadius: '20px',
-              boxShadow: 'var(--shadow-level-1)',
-              border: '1px solid rgba(74, 95, 217, 0.2)',
-              position: 'relative',
-              overflow: 'hidden'
-            }}>
-              <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', backgroundColor: 'var(--color-motive-light-blue)' }} />
-              <h4 style={{ color: 'var(--color-motive-light-blue)', fontSize: '18px', fontWeight: '700', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '20px' }}>✨</span> {t.solutionTitle}
-              </h4>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '15px', lineHeight: 1.6, margin: 0 }}>
-                {t.solutionDesc}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* YouTube Video Demo Section */}
-        <div style={{
-          marginTop: '120px',
-          maxWidth: '1000px',
-          width: '100%',
-          textAlign: 'center',
-          backgroundColor: 'var(--surface-card)',
-          padding: '48px 32px',
-          borderRadius: '24px',
-          boxShadow: 'var(--shadow-level-1)',
-          border: '1px solid var(--border-color)',
-          transition: 'all 0.3s ease'
-        }}>
-          <h3 style={{ fontSize: '28px', color: 'var(--text-primary)', marginBottom: '12px', fontWeight: '700', letterSpacing: '-0.01em' }}>
-            {t.demoHeader}
-          </h3>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: '32px', fontSize: '15px', maxWidth: '600px', margin: '0 auto 32px auto', lineHeight: 1.6 }}>
-            {t.demoSub}
-          </p>
-
-          <div style={{
-            position: 'relative',
-            width: '100%',
-            paddingBottom: '56.25%', /* 16:9 Aspect Ratio */
-            height: 0,
-            overflow: 'hidden',
-            borderRadius: '16px',
-            boxShadow: 'var(--shadow-level-2)',
-            backgroundColor: '#000',
-            border: '1px solid var(--border-color)',
-          }}>
-            <iframe
-              src="https://www.youtube.com/embed/J86kq1aUwlQ?autoplay=1&mute=1&loop=1&playlist=J86kq1aUwlQ"
-              title="Motive Application Demo"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                border: 0,
-                borderRadius: '16px',
-              }}
-            />
-          </div>
-
-          {/* YouTube Section 3-Column Info Cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px', marginTop: '48px', textAlign: 'left' }}>
-            <div style={{ padding: '24px', backgroundColor: 'var(--surface-bg)', borderRadius: '16px', border: '1px solid var(--border-color)', transition: 'all 0.2s ease' }}>
-              <h4 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px', marginTop: 0 }}>
-                <span style={{ fontSize: '18px' }}>✅</span> {t.demoInfoTasksTitle}
-              </h4>
-              <p style={{ fontSize: '14px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
-                {t.demoInfoTasksDesc}
-              </p>
-            </div>
-            <div style={{ padding: '24px', backgroundColor: 'var(--surface-bg)', borderRadius: '16px', border: '1px solid var(--border-color)', transition: 'all 0.2s ease' }}>
-              <h4 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px', marginTop: 0 }}>
-                <span style={{ fontSize: '18px' }}>📝</span> {t.demoInfoJournalsTitle}
-              </h4>
-              <p style={{ fontSize: '14px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
-                {t.demoInfoJournalsDesc}
-              </p>
-            </div>
-            <div style={{ padding: '24px', backgroundColor: 'var(--surface-bg)', borderRadius: '16px', border: '1px solid var(--border-color)', transition: 'all 0.2s ease' }}>
-              <h4 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px', marginTop: 0 }}>
-                <span style={{ fontSize: '18px' }}>📈</span> {t.demoInfoReportsTitle}
-              </h4>
-              <p style={{ fontSize: '14px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
-                {t.demoInfoReportsDesc}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Core Experience Ecosystem Section */}
-        <div style={{ marginTop: '120px', maxWidth: '1000px', width: '100%' }}>
-          <div style={{ textAlign: 'center', marginBottom: '56px' }}>
-            <h3 style={{ fontSize: '32px', color: 'var(--text-primary)', marginBottom: '16px', fontWeight: '700', letterSpacing: '-0.02em' }}>
-              {t.coreHeader}
-            </h3>
-            <p style={{ color: 'var(--text-secondary)', maxWidth: '700px', margin: '0 auto', fontSize: '16px', lineHeight: 1.6 }}>
-              {t.coreSub}
-            </p>
-          </div>
-
-          <div style={{ display: 'flex', gap: '48px', alignItems: 'stretch', flexWrap: 'wrap' }}>
-            {/* Features List */}
-            <div style={{ flex: '1 1 500px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              {/* Tasks feature */}
-              <div style={{ backgroundColor: 'var(--surface-card)', padding: '24px', borderRadius: '16px', boxShadow: 'var(--shadow-level-1)', border: '1px solid var(--border-color)', position: 'relative' }}>
-                <span style={{ position: 'absolute', top: '16px', right: '16px', fontSize: '11px', fontWeight: 'bold', color: 'var(--color-motive-light-blue)', backgroundColor: 'var(--chip-bg)', padding: '4px 8px', borderRadius: '4px' }}>
-                  {t.featTasksBadge}
-                </span>
-                <h4 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: '700', marginBottom: '8px', marginTop: 0 }}>
-                  {t.featTasksTitle}
-                </h4>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: 1.5, margin: 0 }}>
-                  {t.featTasksDesc}
-                </p>
-              </div>
-
-              {/* Journals feature */}
-              <div style={{ backgroundColor: 'var(--surface-card)', padding: '24px', borderRadius: '16px', boxShadow: 'var(--shadow-level-1)', border: '1px solid var(--border-color)', position: 'relative' }}>
-                <span style={{ position: 'absolute', top: '16px', right: '16px', fontSize: '11px', fontWeight: 'bold', color: '#fbbf24', backgroundColor: 'rgba(251, 191, 36, 0.1)', padding: '4px 8px', borderRadius: '4px' }}>
-                  {t.featJournalsBadge}
-                </span>
-                <h4 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: '700', marginBottom: '8px', marginTop: 0 }}>
-                  {t.featJournalsTitle}
-                </h4>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: 1.5, margin: 0 }}>
-                  {t.featJournalsDesc}
-                </p>
-              </div>
-
-              {/* Reports feature */}
-              <div style={{ backgroundColor: 'var(--surface-card)', padding: '24px', borderRadius: '16px', boxShadow: 'var(--shadow-level-1)', border: '1px solid var(--border-color)', position: 'relative' }}>
-                <span style={{ position: 'absolute', top: '16px', right: '16px', fontSize: '11px', fontWeight: 'bold', color: '#34d399', backgroundColor: 'rgba(52, 211, 153, 0.1)', padding: '4px 8px', borderRadius: '4px' }}>
-                  {t.featReportsBadge}
-                </span>
-                <h4 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: '700', marginBottom: '8px', marginTop: 0 }}>
-                  {t.featReportsTitle}
-                </h4>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: 1.5, margin: 0 }}>
-                  {t.featReportsDesc}
-                </p>
-              </div>
-
-              {/* AI summaries feature */}
-              <div style={{ backgroundColor: 'var(--surface-card)', padding: '24px', borderRadius: '16px', boxShadow: 'var(--shadow-level-1)', border: '1px solid var(--color-motive-light-blue)', position: 'relative' }}>
-                <span style={{ position: 'absolute', top: '16px', right: '16px', fontSize: '11px', fontWeight: 'bold', color: 'white', backgroundColor: 'var(--color-motive-light-blue)', padding: '4px 8px', borderRadius: '4px' }}>
-                  {t.featAiBadge}
-                </span>
-                <h4 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: '700', marginBottom: '8px', marginTop: 0 }}>
-                  ✨ {t.featAiTitle}
-                </h4>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: 1.5, margin: 0 }}>
-                  {t.featAiDesc}
-                </p>
-              </div>
-            </div>
-
-            {/* Interactive Media Sidebar Mockup */}
-            <div style={{ flex: '1 1 350px', display: 'flex', flexDirection: 'column', gap: '24px', justifyContent: 'center' }}>
-              <div style={{
-                backgroundColor: 'var(--surface-card)',
-                borderRadius: '24px',
-                padding: '24px',
-                boxShadow: 'var(--shadow-level-2)',
-                border: '1px solid var(--border-color)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '24px'
-              }}>
-                {/* Productivity Velocity Mini-Widget */}
-                <div>
-                  <h5 style={{ color: 'var(--text-primary)', fontSize: '14px', fontWeight: 'bold', margin: '0 0 16px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span>📈 Productivity Velocity</span>
-                    <span style={{ color: 'var(--color-motive-light-blue)', fontSize: '12px' }}>+24% this week</span>
-                  </h5>
-                  <div style={{ display: 'flex', alignItems: 'flex-end', height: '120px', gap: '12px', borderBottom: '1px solid var(--divider-color)', paddingBottom: '8px', paddingLeft: '8px', paddingRight: '8px' }}>
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-                      <div style={{ width: '100%', height: '40px', backgroundColor: 'var(--chip-bg)', borderRadius: '4px', transition: 'height 0.3s ease' }}></div>
-                      <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>M</span>
-                    </div>
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-                      <div style={{ width: '100%', height: '70px', backgroundColor: 'var(--chip-bg)', borderRadius: '4px' }}></div>
-                      <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>T</span>
-                    </div>
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-                      <div style={{ width: '100%', height: '55px', backgroundColor: 'var(--chip-bg)', borderRadius: '4px' }}></div>
-                      <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>W</span>
-                    </div>
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-                      <div style={{ width: '100%', height: '95px', backgroundColor: 'var(--color-motive-light-blue)', borderRadius: '4px' }}></div>
-                      <span style={{ fontSize: '10px', color: 'var(--text-primary)', fontWeight: 'bold' }}>T</span>
-                    </div>
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-                      <div style={{ width: '100%', height: '45px', backgroundColor: 'var(--chip-bg)', borderRadius: '4px' }}></div>
-                      <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>F</span>
-                    </div>
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-                      <div style={{ width: '100%', height: '20px', backgroundColor: 'var(--chip-bg)', borderRadius: '4px' }}></div>
-                      <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>S</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Focus Split Mini-Widget */}
-                <div>
-                  <h5 style={{ color: 'var(--text-primary)', fontSize: '14px', fontWeight: 'bold', margin: '0 0 12px 0' }}>
-                    🎯 Focus Split Ratios
-                  </h5>
-                  {/* Custom Color Bar Split */}
-                  <div style={{ height: '16px', borderRadius: '8px', display: 'flex', overflow: 'hidden', marginBottom: '16px' }}>
-                    <div style={{ width: '55%', backgroundColor: 'var(--color-motive-dark-blue)' }} title="Work: 55%"></div>
-                    <div style={{ width: '20%', backgroundColor: '#4a5fd9' }} title="Study: 20%"></div>
-                    <div style={{ width: '15%', backgroundColor: '#fbbf24' }} title="Personal: 15%"></div>
-                    <div style={{ width: '10%', backgroundColor: '#34d399' }} title="Health: 10%"></div>
-                  </div>
-                  {/* Legends */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', fontSize: '12px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)' }}>
-                      <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--color-motive-dark-blue)' }}></div>
-                      <span>Work (55%)</span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)' }}>
-                      <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#4a5fd9' }}></div>
-                      <span>Study (20%)</span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)' }}>
-                      <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#fbbf24' }}></div>
-                      <span>Personal (15%)</span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)' }}>
-                      <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#34d399' }}></div>
-                      <span>Health (10%)</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Features Highlight Grid Section */}
-        <div style={{ marginTop: '120px', textAlign: 'center', maxWidth: '1000px', width: '100%' }}>
-          <h3 style={{ fontSize: '32px', color: 'var(--text-primary)', marginBottom: '16px', fontWeight: '700', letterSpacing: '-0.02em' }}>
-            {t.featuresHeader}
-          </h3>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: '56px', maxWidth: '700px', margin: '0 auto 56px auto', fontSize: '16px', lineHeight: 1.6 }}>
-            {t.featuresSub}
-          </p>
-
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-            gap: '24px',
-            textAlign: 'left'
-          }}>
-            {/* Feature 1 */}
-            <div style={{
-              backgroundColor: 'var(--surface-card)',
-              padding: '32px 24px',
-              borderRadius: '16px',
-              boxShadow: 'var(--shadow-level-1)',
-              border: '1px solid var(--border-color)',
-              transition: 'all 0.3s ease',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '16px'
-            }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-4px)';
-                e.currentTarget.style.boxShadow = 'var(--shadow-level-2)';
-                e.currentTarget.style.borderColor = 'var(--color-motive-light-blue)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'none';
-                e.currentTarget.style.boxShadow = 'var(--shadow-level-1)';
-                e.currentTarget.style.borderColor = 'var(--border-color)';
-              }}
-            >
-              <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: 'var(--chip-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <FiDatabase size={24} style={{ color: 'var(--color-motive-light-blue)' }} />
-              </div>
-              <h4 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: '700', margin: 0 }}>
-                {t.feature1Title}
-              </h4>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: 1.5, margin: 0 }}>
-                {t.feature1Desc}
-              </p>
-            </div>
-
-            {/* Feature 2 */}
-            <div style={{
-              backgroundColor: 'var(--surface-card)',
-              padding: '32px 24px',
-              borderRadius: '16px',
-              boxShadow: 'var(--shadow-level-1)',
-              border: '1px solid var(--border-color)',
-              transition: 'all 0.3s ease',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '16px'
-            }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-4px)';
-                e.currentTarget.style.boxShadow = 'var(--shadow-level-2)';
-                e.currentTarget.style.borderColor = 'var(--color-motive-light-blue)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'none';
-                e.currentTarget.style.boxShadow = 'var(--shadow-level-1)';
-                e.currentTarget.style.borderColor = 'var(--border-color)';
-              }}
-            >
-              <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: 'var(--chip-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <FiShield size={24} style={{ color: 'var(--color-motive-light-blue)' }} />
-              </div>
-              <h4 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: '700', margin: 0 }}>
-                {t.feature2Title}
-              </h4>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: 1.5, margin: 0 }}>
-                {t.feature2Desc}
-              </p>
-            </div>
-
-            {/* Feature 3 */}
-            <div style={{
-              backgroundColor: 'var(--surface-card)',
-              padding: '32px 24px',
-              borderRadius: '16px',
-              boxShadow: 'var(--shadow-level-1)',
-              border: '1px solid var(--border-color)',
-              transition: 'all 0.3s ease',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '16px'
-            }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-4px)';
-                e.currentTarget.style.boxShadow = 'var(--shadow-level-2)';
-                e.currentTarget.style.borderColor = 'var(--color-motive-light-blue)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'none';
-                e.currentTarget.style.boxShadow = 'var(--shadow-level-1)';
-                e.currentTarget.style.borderColor = 'var(--border-color)';
-              }}
-            >
-              <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: 'var(--chip-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <FiCpu size={24} style={{ color: 'var(--color-motive-light-blue)' }} />
-              </div>
-              <h4 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: '700', margin: 0 }}>
-                {t.feature3Title}
-              </h4>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: 1.5, margin: 0 }}>
-                {t.feature3Desc}
-              </p>
-            </div>
-
-            {/* Feature 4 */}
-            <div style={{
-              backgroundColor: 'var(--surface-card)',
-              padding: '32px 24px',
-              borderRadius: '16px',
-              boxShadow: 'var(--shadow-level-1)',
-              border: '1px solid var(--border-color)',
-              transition: 'all 0.3s ease',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '16px'
-            }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-4px)';
-                e.currentTarget.style.boxShadow = 'var(--shadow-level-2)';
-                e.currentTarget.style.borderColor = 'var(--color-motive-light-blue)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'none';
-                e.currentTarget.style.boxShadow = 'var(--shadow-level-1)';
-                e.currentTarget.style.borderColor = 'var(--border-color)';
-              }}
-            >
-              <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: 'var(--chip-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <FiDownloadCloud size={24} style={{ color: 'var(--color-motive-light-blue)' }} />
-              </div>
-              <h4 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: '700', margin: 0 }}>
-                {t.feature4Title}
-              </h4>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: 1.5, margin: 0 }}>
-                {t.feature4Desc}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom Call to Action Section */}
-        <div style={{
-          marginTop: '120px',
-          marginBottom: '40px',
-          maxWidth: '1000px',
-          width: '100%',
-          textAlign: 'center',
-          backgroundColor: 'var(--surface-card)',
-          padding: '56px 40px',
-          borderRadius: '24px',
-          boxShadow: 'var(--shadow-level-2)',
-          border: '1px solid var(--color-motive-light-blue)',
-          boxSizing: 'border-box'
-        }}>
-          <h3 style={{ fontSize: '32px', color: 'var(--text-primary)', marginBottom: '16px', fontWeight: '700', letterSpacing: '-0.02em', marginTop: 0 }}>
-            {t.ctaHeader}
-          </h3>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: '32px', fontSize: '16px', maxWidth: '580px', margin: '0 auto 32px auto', lineHeight: 1.6 }}>
-            {t.ctaSub}
-          </p>
-          <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <Button onClick={handleLogin} style={{ padding: '16px 36px', fontSize: '16px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '12px', fontWeight: '700', borderRadius: '8px' }}>
-              {!user && <GoogleIcon />}
-              <span>{user ? t.goToDashboard : t.ctaButton}</span>
-            </Button>
-          </div>
-        </div>
+        </section>
       </main>
 
       {/* Footer */}
